@@ -7,7 +7,7 @@ import { FlowButton } from "@/components/ui/flow-button";
 
 const CODE_LINES = [
   {
-    raw: 'const dev = {',
+    raw: "const dev = {",
     html: '<span class="c-keyword">const</span> <span class="c-var">dev</span> = {',
   },
   {
@@ -19,27 +19,31 @@ const CODE_LINES = [
     html: '  <span class="c-prop">stack</span>: [<span class="c-str">"Python"</span>, <span class="c-str">"JS"</span>, <span class="c-str">"SQL"</span>],',
   },
   {
-    raw: '  foco: "Full-Stack",',
-    html: '  <span class="c-prop">foco</span>: <span class="c-str">"Full-Stack"</span>,',
+    raw: '  foco: "Full-Stack","Data Science"',
+    html: '  <span class="c-prop">foco</span>: <span class="c-str">"Full-Stack"</span>,<span class="c-str">"Data Science"</span>,',
   },
   {
     raw: '  estudando: "Sistemas de Info",',
     html: '  <span class="c-prop">estudando</span>: <span class="c-str">"Sistemas de Info"</span>,',
   },
   {
-    raw: '  café: true,',
+    raw: "  café: true,",
     html: '  <span class="c-prop">café</span>: <span class="c-bool">true</span>,',
   },
-  { raw: '};', html: '};' },
+  { raw: "};", html: "};" },
 ];
 
 function escHtml(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 const SOCIALS = [
   { href: "https://github.com/NyckzXD", icon: Github, label: "GitHub" },
-  { href: "https://www.instagram.com/nycolasfe_/", icon: Instagram, label: "Instagram" },
+  {
+    href: "https://www.instagram.com/nycolasfe_/",
+    icon: Instagram,
+    label: "Instagram",
+  },
 ];
 
 export default function HeroSection() {
@@ -58,7 +62,10 @@ export default function HeroSection() {
     function render() {
       if (!el) return;
       const partial = escHtml(CODE_LINES[lineIdx].raw.slice(0, charIdx));
-      el.innerHTML = [...done, partial + '<span class="code-cursor"></span>'].join('\n');
+      el.innerHTML = [
+        ...done,
+        partial + '<span class="code-cursor"></span>',
+      ].join("\n");
     }
 
     function tick() {
@@ -75,10 +82,14 @@ export default function HeroSection() {
         if (lineIdx < CODE_LINES.length) {
           timer = setTimeout(tick, 160);
         } else {
-          if (el) el.innerHTML = done.join('\n') + '<span class="code-cursor"></span>';
+          if (el)
+            el.innerHTML =
+              done.join("\n") + '<span class="code-cursor"></span>';
           timer = setTimeout(() => {
             if (cancelled) return;
-            lineIdx = 0; charIdx = 0; done.length = 0;
+            lineIdx = 0;
+            charIdx = 0;
+            done.length = 0;
             tick();
           }, 5000);
         }
@@ -86,7 +97,10 @@ export default function HeroSection() {
     }
 
     tick();
-    return () => { cancelled = true; clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, []);
 
   return (
@@ -109,18 +123,21 @@ export default function HeroSection() {
           </h1>
 
           <p className="mb-5 font-mono text-[0.88rem] text-muted">
-            Desenvolvedor Júnior <span className="mx-1 opacity-40">·</span> Estudante de SI{" "}
-            <span className="mx-1 opacity-40">·</span> 20 anos
+            Desenvolvedor Júnior <span className="mx-1 opacity-40">·</span>{" "}
+            Estudante de SI <span className="mx-1 opacity-40">·</span> 20 anos
           </p>
 
           <p className="mb-9 max-w-[480px] text-[1.05rem] text-[#cfcbef]">
-            Apaixonado por resolver problemas com código. Atualmente estudando na{" "}
-            <strong>Faculdade Anhanguera</strong>.
+            Apaixonado por resolver problemas com código. Atualmente estudando
+            na <strong>Faculdade Anhanguera</strong>.
           </p>
 
           <div className="mb-10 flex flex-wrap gap-3">
             <FlowButton href="#projetos" text="Ver projetos" />
-            <FlowButton href="mailto:nycolas.tec@gmail.com" text="Falar comigo" />
+            <FlowButton
+              href="mailto:nycolas.tec@gmail.com"
+              text="Falar comigo"
+            />
           </div>
 
           <div className="flex gap-3">
@@ -146,7 +163,9 @@ export default function HeroSection() {
               <span className="inline-block h-3 w-3 rounded-full bg-red" />
               <span className="inline-block h-3 w-3 rounded-full bg-yellow" />
               <span className="inline-block h-3 w-3 rounded-full bg-green" />
-              <span className="ml-2 font-mono text-[0.78rem] text-muted">nycolas.js</span>
+              <span className="ml-2 font-mono text-[0.78rem] text-muted">
+                nycolas.js
+              </span>
             </div>
 
             <pre className="overflow-x-auto whitespace-pre px-6 py-5 font-mono text-[0.88rem] leading-[1.9]">
