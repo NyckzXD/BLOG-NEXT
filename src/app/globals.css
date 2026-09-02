@@ -52,25 +52,6 @@
     background-image: linear-gradient(135deg, theme('colors.accent'), theme('colors.accent2'));
   }
 
-  .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-bold text-[#0d0b1a] shadow-glow transition-all duration-200;
-    background-image: linear-gradient(135deg, theme('colors.accent'), theme('colors.accent2'));
-  }
-  .btn-primary:hover {
-    @apply -translate-y-0.5 opacity-90 shadow-glow-lg;
-  }
-
-  .btn-ghost {
-    @apply inline-flex items-center gap-2 rounded-xl border border-border bg-bg3 px-6 py-3 text-sm font-medium text-text-main transition-all duration-200;
-  }
-  .btn-ghost:hover {
-    @apply -translate-y-0.5 border-accent2/40;
-  }
-
-  .glass-panel {
-    @apply border border-border bg-bg2/70 backdrop-blur-xl;
-  }
-
   .eyebrow {
     @apply inline-flex items-center gap-2 font-mono text-xs uppercase tracking-[0.18em] text-accent;
   }

@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BookOpen, Star, GitFork, ArrowRight, ArrowUpRight } from "lucide-react";
+import { BookOpen, Star, GitFork, ArrowUpRight } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { FlowButton } from "@/components/ui/flow-button";
 
 interface Repo {
   id: number;
@@ -107,14 +108,12 @@ export default function ProjectsSection() {
         </div>
 
         <div className="text-center">
-          <a
+          <FlowButton
             href="https://github.com/NyckzXD"
             target="_blank"
             rel="noreferrer"
-            className="btn-ghost"
-          >
-            Ver todos no GitHub <ArrowRight size={16} />
-          </a>
+            text="Ver todos no GitHub"
+          />
         </div>
       </div>
     </section>

@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Github, Instagram, ArrowRight, Mail } from "lucide-react";
+import { Github, Instagram } from "lucide-react";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths";
+import { FlowButton } from "@/components/ui/flow-button";
 
 const CODE_LINES = [
   {
@@ -118,13 +119,8 @@ export default function HeroSection() {
           </p>
 
           <div className="mb-10 flex flex-wrap gap-3">
-            <a href="#projetos" className="btn-primary">
-              Ver projetos <ArrowRight size={16} />
-            </a>
-            <a href="mailto:nycolas.tec@gmail.com" className="btn-ghost">
-              <Mail size={16} />
-              Falar comigo
-            </a>
+            <FlowButton href="#projetos" text="Ver projetos" />
+            <FlowButton href="mailto:nycolas.tec@gmail.com" text="Falar comigo" />
           </div>
 
           <div className="flex gap-3">

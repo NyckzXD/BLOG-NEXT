@@ -1,6 +1,7 @@
 import { Briefcase, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { FlowButton } from "@/components/ui/flow-button";
 
 const CAREER_CARDS = [
   { title: "Assistente de T.I", dates: "Nov 2024 – Atual" },
@@ -54,9 +55,7 @@ export default function CareerSection() {
 
         <Reveal delay={0.2}>
           <div className="text-center">
-            <a href="mailto:nycolas.tec@gmail.com" className="btn-primary">
-              Entrar em contato
-            </a>
+            <FlowButton href="mailto:nycolas.tec@gmail.com" text="Entrar em contato" />
           </div>
         </Reveal>
       </div>
