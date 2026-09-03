@@ -92,7 +92,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
     },
     ref
   ) => {
-    const buttonRef = React.useRef<HTMLButtonElement>(null);
+    const buttonRef = React.useRef<HTMLButtonElement | null>(null);
     const isDisabled = Boolean(disabled || loading);
     const [hovered, setHovered] = React.useState(false);
     const [isPressed, setIsPressed] = React.useState(false);
