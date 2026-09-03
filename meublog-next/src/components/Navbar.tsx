@@ -50,7 +50,7 @@ export default function Navbar() {
 
         <a
           href="mailto:nycolas.tec@gmail.com"
-          className="ml-2 flex items-center gap-1.5 rounded-lg border border-accent2/35 px-4 py-1.5 text-sm font-semibold text-accent2 transition-all duration-200 hover:bg-accent/10 hover:shadow-glow"
+          className="ml-2 flex items-center gap-1.5 rounded-lg border border-accent2/35 px-4 py-1.5 text-sm font-semibold text-accent2 transition-all duration-200 hover:bg-accent/10"
         >
           <Mail size={14} />
           contato

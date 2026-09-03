@@ -44,7 +44,7 @@ export default function CareerSection() {
         <Reveal delay={0.15}>
           <ul className="mb-10 flex flex-col gap-3">
             {SKILLS_LIST.map((item, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-[0.95rem] text-[#cfcbef]">
+              <li key={i} className="flex items-start gap-2.5 text-[0.95rem] text-[#cacaca]">
                 <Sparkles size={15} className="mt-1 flex-none text-accent" />
                 {item}
               </li>

@@ -89,10 +89,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <FloatingPathsBackground
-      position={-1}
-      className="min-h-screen bg-[linear-gradient(rgba(200,190,250,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(200,190,250,0.05)_1px,transparent_1px)] bg-[length:44px_44px]"
-    >
+    <FloatingPathsBackground position={-1} className="min-h-screen">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center gap-14 px-[5%] pb-20 pt-32 lg:flex-row">
         {/* Left: content */}
         <div className="min-w-0 flex-1">
@@ -112,7 +109,7 @@ export default function HeroSection() {
             <span className="mx-1 opacity-40">·</span> 20 anos
           </p>
 
-          <p className="mb-9 max-w-[480px] text-[1.05rem] text-[#cfcbef]">
+          <p className="mb-9 max-w-[480px] text-[1.05rem] text-[#cacaca]">
             Apaixonado por resolver problemas com código. Atualmente estudando na{" "}
             <strong>Faculdade Anhanguera</strong>.
           </p>
@@ -145,7 +142,7 @@ export default function HeroSection() {
 
         {/* Right: code window */}
         <div className="w-full max-w-[380px] flex-none lg:w-[380px]">
-          <div className="overflow-hidden rounded-2xl border border-border bg-bg2 shadow-card shadow-glow-lg">
+          <div className="overflow-hidden rounded-2xl border border-border bg-bg2 shadow-card">
             <div className="flex items-center gap-[7px] border-b border-border bg-bg3 px-4 py-3">
               <span className="inline-block h-3 w-3 rounded-full bg-red" />
               <span className="inline-block h-3 w-3 rounded-full bg-yellow" />

@@ -30,7 +30,7 @@ export default function AboutSection() {
           <Reveal delay={0.1}>
             <div className="flex flex-col gap-4">
               {PARAGRAPHS.map((text, i) => (
-                <p key={i} className="text-[#cfcbef]">{text}</p>
+                <p key={i} className="text-[#cacaca]">{text}</p>
               ))}
             </div>
           </Reveal>
