@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Menu, X, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { OriginButton } from "@/components/ui/origin-button";
 
 const NAV_LINKS = [
   { href: "#sobre", label: "sobre" },
@@ -48,13 +49,14 @@ export default function Navbar() {
           </a>
         ))}
 
-        <a
+        <OriginButton
+          variant="dark"
           href="mailto:nycolas.tec@gmail.com"
-          className="ml-2 flex items-center gap-1.5 rounded-lg border border-accent2/35 px-4 py-1.5 text-sm font-semibold text-accent2 transition-all duration-200 hover:bg-accent/10"
+          className="ml-2 h-9 gap-1.5 rounded-lg px-4 text-sm"
         >
           <Mail size={14} />
           contato
-        </a>
+        </OriginButton>
       </div>
 
       <button

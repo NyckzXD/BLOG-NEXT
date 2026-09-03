@@ -1,6 +1,7 @@
 import { Briefcase, Sparkles } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
+import { OriginButton } from "@/components/ui/origin-button";
 
 const CAREER_CARDS = [
   { title: "Assistente de T.I", dates: "Nov 2024 – Atual" },
@@ -54,9 +55,9 @@ export default function CareerSection() {
 
         <Reveal delay={0.2}>
           <div className="text-center">
-            <a href="mailto:nycolas.tec@gmail.com" className="btn-primary">
+            <OriginButton variant="light" href="mailto:nycolas.tec@gmail.com">
               Entrar em contato
-            </a>
+            </OriginButton>
           </div>
         </Reveal>
       </div>

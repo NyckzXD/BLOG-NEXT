@@ -5,8 +5,18 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-const componentThemeClassName =
-  "[--ic-background:#ffffff] [--ic-foreground:#111111] [--ic-primary:#111111] [--ic-secondary:#646b75] [--ic-surface-border:#e9edf2] [--ic-border:#e3e7ec] [--ic-card:#ffffff] [--ic-card-foreground:#111111] [--ic-muted:#f5f7fa] [--ic-muted-foreground:#6d7480] [--ic-accent:#f3f5f8] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--ic-accent-foreground:#111111] [--ic-input:#e3e7ec] [--ic-ring:rgba(17,17,17,0.16)] [--ic-destructive:#dc2626] [--ic-paper:#fcfcfd] [--ic-popover-foreground:#111111] [--ic-brand:#0ea5e9] [--ic-brand-soft:#bae6fd] [--ic-shadow-soft:0_18px_38px_-24px_rgba(15,23,42,0.35)] [--ic-chart-1:oklch(0.52_0.19_254)] [--ic-chart-2:oklch(0.74_0.11_232)] [--ic-chart-3:oklch(0.42_0.16_262)] [--ic-chart-4:oklch(0.84_0.07_228)] [--ic-chart-5:oklch(0.62_0.14_240)] [--color-background:var(--ic-background)] [--color-foreground:var(--ic-foreground)] [--color-primary:var(--ic-primary)] [--color-secondary:var(--ic-secondary)] [--color-border:var(--ic-border)] [--color-card:var(--ic-card)] [--color-card-foreground:var(--ic-card-foreground)] [--color-muted:var(--ic-muted)] [--color-muted-foreground:var(--ic-muted-foreground)] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--color-input:var(--ic-input)] [--color-ring:var(--ic-ring)] [--color-destructive:var(--ic-destructive)] [--color-paper:var(--ic-paper)] [--color-popover-foreground:var(--ic-popover-foreground)] [--color-brand:var(--ic-brand)] [--color-brand-soft:var(--ic-brand-soft)] [--color-chart-1:var(--ic-chart-1)] [--color-chart-2:var(--ic-chart-2)] [--color-chart-3:var(--ic-chart-3)] [--color-chart-4:var(--ic-chart-4)] [--color-chart-5:var(--ic-chart-5)] dark:[--ic-background:#111111] dark:[--ic-foreground:#f6f3ec] dark:[--ic-primary:#f6f3ec] dark:[--ic-secondary:#cbc6bb] dark:[--ic-surface-border:#2a2a25] dark:[--ic-border:#2b2a25] dark:[--ic-card:#111111] dark:[--ic-card-foreground:#f6f3ec] dark:[--ic-muted:#171716] dark:[--ic-muted-foreground:#9a958a] dark:[--ic-accent:#1a1a18] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] dark:[--ic-accent-foreground:#f6f3ec] dark:[--ic-input:#2b2a25] dark:[--ic-ring:rgba(246,243,236,0.18)] dark:[--ic-destructive:#f87171] dark:[--ic-paper:#171716] dark:[--ic-popover-foreground:#f6f3ec] dark:[--ic-brand:#38bdf8] dark:[--ic-brand-soft:#0c4a6e] dark:[--ic-shadow-soft:0_20px_44px_-28px_rgba(0,0,0,0.6)] dark:[--ic-chart-1:oklch(0.68_0.17_250)] dark:[--ic-chart-2:oklch(0.82_0.09_225)] dark:[--ic-chart-3:oklch(0.58_0.15_260)] dark:[--ic-chart-4:oklch(0.75_0.12_235)] dark:[--ic-chart-5:oklch(0.88_0.06_220)]";
+// Maps the component's own --ic-* palette onto the token names its Tailwind
+// classes read (--color-*). Kept separate from the palette values so a given
+// button instance can pick "light" or "dark" explicitly, instead of relying
+// on a `dark` class ancestor that the rest of this site doesn't use.
+const colorMapClassName =
+  "[--color-background:var(--ic-background)] [--color-foreground:var(--ic-foreground)] [--color-primary:var(--ic-primary)] [--color-secondary:var(--ic-secondary)] [--color-border:var(--ic-border)] [--color-card:var(--ic-card)] [--color-card-foreground:var(--ic-card-foreground)] [--color-muted:var(--ic-muted)] [--color-muted-foreground:var(--ic-muted-foreground)] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--color-input:var(--ic-input)] [--color-ring:var(--ic-ring)] [--color-destructive:var(--ic-destructive)] [--color-paper:var(--ic-paper)] [--color-popover-foreground:var(--ic-popover-foreground)] [--color-brand:var(--ic-brand)] [--color-brand-soft:var(--ic-brand-soft)] [--color-chart-1:var(--ic-chart-1)] [--color-chart-2:var(--ic-chart-2)] [--color-chart-3:var(--ic-chart-3)] [--color-chart-4:var(--ic-chart-4)] [--color-chart-5:var(--ic-chart-5)]";
+
+const lightThemeClassName =
+  "[--ic-background:#ffffff] [--ic-foreground:#111111] [--ic-primary:#111111] [--ic-secondary:#646b75] [--ic-surface-border:#e9edf2] [--ic-border:#e3e7ec] [--ic-card:#ffffff] [--ic-card-foreground:#111111] [--ic-muted:#f5f7fa] [--ic-muted-foreground:#6d7480] [--ic-accent:#f3f5f8] [--ic-accent-foreground:#111111] [--ic-input:#e3e7ec] [--ic-ring:rgba(17,17,17,0.16)] [--ic-destructive:#dc2626] [--ic-paper:#fcfcfd] [--ic-popover-foreground:#111111] [--ic-brand:#0ea5e9] [--ic-brand-soft:#bae6fd] [--ic-shadow-soft:0_18px_38px_-24px_rgba(15,23,42,0.35)] [--ic-chart-1:oklch(0.52_0.19_254)] [--ic-chart-2:oklch(0.74_0.11_232)] [--ic-chart-3:oklch(0.42_0.16_262)] [--ic-chart-4:oklch(0.84_0.07_228)] [--ic-chart-5:oklch(0.62_0.14_240)]";
+
+const darkThemeClassName =
+  "[--ic-background:#111111] [--ic-foreground:#f6f3ec] [--ic-primary:#f6f3ec] [--ic-secondary:#cbc6bb] [--ic-surface-border:#2a2a25] [--ic-border:#2b2a25] [--ic-card:#111111] [--ic-card-foreground:#f6f3ec] [--ic-muted:#171716] [--ic-muted-foreground:#9a958a] [--ic-accent:#1a1a18] [--ic-accent-foreground:#f6f3ec] [--ic-input:#2b2a25] [--ic-ring:rgba(246,243,236,0.18)] [--ic-destructive:#f87171] [--ic-paper:#171716] [--ic-popover-foreground:#f6f3ec] [--ic-brand:#38bdf8] [--ic-brand-soft:#0c4a6e] [--ic-shadow-soft:0_20px_44px_-28px_rgba(0,0,0,0.6)] [--ic-chart-1:oklch(0.68_0.17_250)] [--ic-chart-2:oklch(0.82_0.09_225)] [--ic-chart-3:oklch(0.58_0.15_260)] [--ic-chart-4:oklch(0.75_0.12_235)] [--ic-chart-5:oklch(0.88_0.06_220)]";
 
 const FILL_DURATION = 0.5;
 const FILL_EASE = [0.16, 1, 0.3, 1] as const;
@@ -68,6 +78,12 @@ function hasTextContent(node: React.ReactNode): boolean {
 type OriginButtonProps = ButtonHTMLAttributesForMotion & {
   children?: React.ReactNode;
   loading?: boolean;
+  /** Visual theme, independent of the page's own dark/light state. Defaults to "dark". */
+  variant?: "light" | "dark";
+  /** When set, renders an <a> instead of a <button> (e.g. for navigation or mailto links). */
+  href?: string;
+  target?: string;
+  rel?: string;
 };
 
 const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
@@ -77,6 +93,10 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
       className,
       disabled = false,
       loading = false,
+      variant = "dark",
+      href,
+      target,
+      rel,
       type = "button",
       onBlur,
       onClick,
@@ -93,6 +113,8 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
     ref
   ) => {
     const buttonRef = React.useRef<HTMLButtonElement | null>(null);
+    const isLight = variant === "light";
+    const MotionTag = (href ? motion.a : motion.button) as any;
     const isDisabled = Boolean(disabled || loading);
     const [hovered, setHovered] = React.useState(false);
     const [isPressed, setIsPressed] = React.useState(false);
@@ -182,23 +204,35 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
     );
 
     return (
-      <motion.button
+      <MotionTag
         {...props}
+        href={href}
+        target={target}
+        rel={rel}
         aria-busy={loading || undefined}
+        aria-disabled={href && isDisabled ? true : undefined}
         className={cn(
-          componentThemeClassName,
+          colorMapClassName,
+          isLight ? lightThemeClassName : darkThemeClassName,
           "relative inline-flex h-12 cursor-pointer touch-manipulation select-none items-center justify-center overflow-hidden rounded-xl px-8 font-medium text-[15px] tracking-[-0.02em]",
-          "border-[0.5px] border-[var(--color-border)] bg-[var(--color-card)] text-[var(--color-card-foreground)]",
-          "dark:bg-[var(--color-muted)] dark:text-[var(--color-foreground)]",
-          "transition-[color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
+          "border-[0.5px] border-[var(--color-border)]",
+          isLight
+            ? "bg-[var(--color-card)] text-[var(--color-card-foreground)]"
+            : "bg-[var(--color-muted)] text-[var(--color-foreground)]",
+          // Kept in sync with FILL_DURATION/FILL_EASE so the text color and the
+          // circular fill finish transitioning together instead of the text
+          // flipping color before the fill has visually caught up.
+          "transition-[color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)]",
           "disabled:pointer-events-none disabled:opacity-50",
-          showFill && "text-[var(--color-background)] dark:text-neutral-950",
+          href && isDisabled && "pointer-events-none opacity-50",
+          showFill &&
+            (isLight ? "text-[var(--color-background)]" : "text-neutral-950"),
           className
         )}
         data-pressed={isPressed ? "true" : "false"}
-        disabled={isDisabled}
-        onBlur={(event) => {
+        disabled={href ? undefined : isDisabled}
+        onBlur={(event: React.FocusEvent<HTMLButtonElement>) => {
           onBlur?.(event);
           setIsPressed(false);
           if (!event.defaultPrevented) {
@@ -206,7 +240,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
           }
         }}
         onClick={onClick}
-        onFocus={(event) => {
+        onFocus={(event: React.FocusEvent<HTMLButtonElement>) => {
           onFocus?.(event);
           if (isDisabled || event.defaultPrevented) return;
           if (event.currentTarget.matches(":focus-visible")) {
@@ -214,7 +248,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
             setHovered(true);
           }
         }}
-        onKeyDown={(event) => {
+        onKeyDown={(event: React.KeyboardEvent<HTMLButtonElement>) => {
           onKeyDown?.(event);
 
           if (
@@ -234,7 +268,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
           setIsPressed(true);
           setHovered(true);
         }}
-        onKeyUp={(event) => {
+        onKeyUp={(event: React.KeyboardEvent<HTMLButtonElement>) => {
           onKeyUp?.(event);
 
           if (event.key === " " || event.key === "Enter") {
@@ -244,11 +278,11 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
             }
           }
         }}
-        onPointerCancel={(event) => {
+        onPointerCancel={(event: React.PointerEvent<HTMLButtonElement>) => {
           onPointerCancel?.(event);
           setIsPressed(false);
         }}
-        onPointerDown={(event) => {
+        onPointerDown={(event: React.PointerEvent<HTMLButtonElement>) => {
           onPointerDown?.(event);
 
           if (event.defaultPrevented || isDisabled || event.button !== 0) {
@@ -259,29 +293,32 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
           setIsPressed(true);
           setHovered(true);
         }}
-        onPointerEnter={(event) => {
+        onPointerEnter={(event: React.PointerEvent<HTMLButtonElement>) => {
           onPointerEnter?.(event);
           if (isDisabled || event.defaultPrevented) return;
           updateOriginFromPointer(event);
           setHovered(true);
         }}
-        onPointerLeave={(event) => {
+        onPointerLeave={(event: React.PointerEvent<HTMLButtonElement>) => {
           onPointerLeave?.(event);
           setHovered(false);
           setIsPressed(false);
         }}
-        onPointerUp={(event) => {
+        onPointerUp={(event: React.PointerEvent<HTMLButtonElement>) => {
           onPointerUp?.(event);
           setIsPressed(false);
         }}
         ref={setMergedRef}
-        type={type}
+        type={href ? undefined : type}
         whileTap={isDisabled ? undefined : { scale: 0.985 }}
       >
         <motion.span
           animate={{ scale: showFill && coverSize > 0 ? 1 : 0 }}
           aria-hidden
-          className="pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full bg-[var(--color-foreground)] dark:bg-neutral-50"
+          className={cn(
+            "pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
+            isLight ? "bg-[var(--color-foreground)]" : "bg-neutral-50"
+          )}
           initial={false}
           style={{
             height: coverSize,
@@ -294,7 +331,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
         <span className="relative z-10 inline-flex items-center justify-center gap-2">
           {children}
         </span>
-      </motion.button>
+      </MotionTag>
     );
   }
 );

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { Github, Instagram, ArrowRight, Mail } from "lucide-react";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths";
+import { OriginButton } from "@/components/ui/origin-button";
 
 const CODE_LINES = [
   {
@@ -115,13 +116,13 @@ export default function HeroSection() {
           </p>
 
           <div className="mb-10 flex flex-wrap gap-3">
-            <a href="#projetos" className="btn-primary">
+            <OriginButton variant="light" href="#projetos">
               Ver projetos <ArrowRight size={16} />
-            </a>
-            <a href="mailto:nycolas.tec@gmail.com" className="btn-ghost">
+            </OriginButton>
+            <OriginButton variant="dark" href="mailto:nycolas.tec@gmail.com">
               <Mail size={16} />
               Falar comigo
-            </a>
+            </OriginButton>
           </div>
 
           <div className="flex gap-3">
