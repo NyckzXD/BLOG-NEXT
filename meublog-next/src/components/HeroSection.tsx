@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Github, Instagram } from "lucide-react";
+import { Github, Instagram, ArrowRight, Mail } from "lucide-react";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths";
-import { FlowButton } from "@/components/ui/flow-button";
+import { OriginButton } from "@/components/ui/origin-button";
 
 const CODE_LINES = [
   {
@@ -19,8 +19,8 @@ const CODE_LINES = [
     html: '  <span class="c-prop">stack</span>: [<span class="c-str">"Python"</span>, <span class="c-str">"JS"</span>, <span class="c-str">"SQL"</span>],',
   },
   {
-    raw: '  foco: "Full-Stack","Data Science"',
-    html: '  <span class="c-prop">foco</span>: <span class="c-str">"Full-Stack"</span>,<span class="c-str">"Data Science"</span>,',
+    raw: '  foco: "Full-Stack",',
+    html: '  <span class="c-prop">foco</span>: <span class="c-str">"Full-Stack"</span>,',
   },
   {
     raw: '  estudando: "Sistemas de Info",',
@@ -104,18 +104,10 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <FloatingPathsBackground
-      position={-1}
-      className="min-h-screen bg-[linear-gradient(rgba(200,190,250,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(200,190,250,0.05)_1px,transparent_1px)] bg-[length:44px_44px]"
-    >
+    <FloatingPathsBackground position={-1} className="min-h-screen">
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center gap-14 px-[5%] pb-20 pt-32 lg:flex-row">
         {/* Left: content */}
         <div className="min-w-0 flex-1">
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-green/20 bg-green/10 px-3.5 py-1.5 text-[0.82rem] tracking-wide text-green">
-            <span className="inline-block h-[7px] w-[7px] animate-pulse2 rounded-full bg-green" />
-            Aberto a oportunidades
-          </p>
-
           <h1 className="mb-4 text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold leading-[1.12] tracking-tight text-white">
             Oi, eu sou
             <br />
@@ -127,17 +119,19 @@ export default function HeroSection() {
             Estudante de SI <span className="mx-1 opacity-40">·</span> 20 anos
           </p>
 
-          <p className="mb-9 max-w-[480px] text-[1.05rem] text-[#cfcbef]">
+          <p className="mb-9 max-w-[480px] text-[1.05rem] text-[#cacaca]">
             Apaixonado por resolver problemas com código. Atualmente estudando
             na <strong>Faculdade Anhanguera</strong>.
           </p>
 
           <div className="mb-10 flex flex-wrap gap-3">
-            <FlowButton href="#projetos" text="Ver projetos" />
-            <FlowButton
-              href="mailto:nycolas.tec@gmail.com"
-              text="Falar comigo"
-            />
+            <OriginButton variant="light" href="#projetos">
+              Ver projetos <ArrowRight size={16} />
+            </OriginButton>
+            <OriginButton variant="dark" href="mailto:nycolas.tec@gmail.com">
+              <Mail size={16} />
+              Falar comigo
+            </OriginButton>
           </div>
 
           <div className="flex gap-3">
@@ -158,7 +152,7 @@ export default function HeroSection() {
 
         {/* Right: code window */}
         <div className="w-full max-w-[380px] flex-none lg:w-[380px]">
-          <div className="overflow-hidden rounded-2xl border border-border bg-bg2 shadow-card shadow-glow-lg">
+          <div className="overflow-hidden rounded-2xl border border-border bg-bg2 shadow-card">
             <div className="flex items-center gap-[7px] border-b border-border bg-bg3 px-4 py-3">
               <span className="inline-block h-3 w-3 rounded-full bg-red" />
               <span className="inline-block h-3 w-3 rounded-full bg-yellow" />

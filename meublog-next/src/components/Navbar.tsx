@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Mail } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { FlowButton } from "@/components/ui/flow-button";
+import { OriginButton } from "@/components/ui/origin-button";
 
 const NAV_LINKS = [
   { href: "#sobre", label: "sobre" },
@@ -49,11 +49,14 @@ export default function Navbar() {
           </a>
         ))}
 
-        <FlowButton
+        <OriginButton
+          variant="dark"
           href="mailto:nycolas.tec@gmail.com"
-          text="contato"
-          className="ml-2 px-5 py-2 text-xs"
-        />
+          className="ml-2 h-9 gap-1.5 rounded-lg px-4 text-sm"
+        >
+          <Mail size={14} />
+          contato
+        </OriginButton>
       </div>
 
       <button
@@ -84,12 +87,14 @@ export default function Navbar() {
                 {link.label}
               </a>
             ))}
-            <FlowButton
+            <a
               href="mailto:nycolas.tec@gmail.com"
-              text="contato"
               onClick={() => setMenuOpen(false)}
-              className="mt-1 w-fit px-5 py-2 text-xs"
-            />
+              className="mt-1 flex items-center gap-2 rounded-md px-2 py-2.5 font-mono text-sm text-accent2"
+            >
+              <Mail size={14} />
+              contato
+            </a>
           </motion.div>
         )}
       </AnimatePresence>
