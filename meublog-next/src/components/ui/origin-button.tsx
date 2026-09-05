@@ -36,9 +36,21 @@ type ButtonHTMLAttributesForMotion = Omit<
   | "onDrop"
 >;
 
+// FILL_EASE is a steep ease-out: it covers ~90% of the distance almost
+// immediately and spends the rest of FILL_DURATION creeping through the
+// last stretch. A circle sized to *exactly* reach the farthest corner only
+// finishes covering that corner once scale hits 1 — i.e. right at the end
+// of that slow tail. Any interruption (mouse leaving early, a quick hover)
+// during that tail leaves a sliver of the corner uncovered, which reads as
+// "the fill stopped partway" / "never fully covers the button". Overshooting
+// the radius moves full corner coverage earlier into the fast part of the
+// curve, so it reads as complete well before scale actually reaches 1.
+const COVER_OVERSHOOT = 1.15;
+
 function getCoverDiameter(width: number, height: number, x: number, y: number) {
   return Math.ceil(
     2 *
+      COVER_OVERSHOOT *
       Math.max(
         Math.hypot(x, y),
         Math.hypot(width - x, y),

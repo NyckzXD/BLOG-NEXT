@@ -7,7 +7,7 @@ import { OriginButton } from "@/components/ui/origin-button";
 
 const CODE_LINES = [
   {
-    raw: 'const dev = {',
+    raw: "const dev = {",
     html: '<span class="c-keyword">const</span> <span class="c-var">dev</span> = {',
   },
   {
@@ -27,19 +27,23 @@ const CODE_LINES = [
     html: '  <span class="c-prop">estudando</span>: <span class="c-str">"Sistemas de Info"</span>,',
   },
   {
-    raw: '  café: true,',
+    raw: "  café: true,",
     html: '  <span class="c-prop">café</span>: <span class="c-bool">true</span>,',
   },
-  { raw: '};', html: '};' },
+  { raw: "};", html: "};" },
 ];
 
 function escHtml(s: string) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 const SOCIALS = [
   { href: "https://github.com/NyckzXD", icon: Github, label: "GitHub" },
-  { href: "https://www.instagram.com/nycolasfe_/", icon: Instagram, label: "Instagram" },
+  {
+    href: "https://www.instagram.com/nycolasfe_/",
+    icon: Instagram,
+    label: "Instagram",
+  },
 ];
 
 export default function HeroSection() {
@@ -58,7 +62,10 @@ export default function HeroSection() {
     function render() {
       if (!el) return;
       const partial = escHtml(CODE_LINES[lineIdx].raw.slice(0, charIdx));
-      el.innerHTML = [...done, partial + '<span class="code-cursor"></span>'].join('\n');
+      el.innerHTML = [
+        ...done,
+        partial + '<span class="code-cursor"></span>',
+      ].join("\n");
     }
 
     function tick() {
@@ -75,10 +82,14 @@ export default function HeroSection() {
         if (lineIdx < CODE_LINES.length) {
           timer = setTimeout(tick, 160);
         } else {
-          if (el) el.innerHTML = done.join('\n') + '<span class="code-cursor"></span>';
+          if (el)
+            el.innerHTML =
+              done.join("\n") + '<span class="code-cursor"></span>';
           timer = setTimeout(() => {
             if (cancelled) return;
-            lineIdx = 0; charIdx = 0; done.length = 0;
+            lineIdx = 0;
+            charIdx = 0;
+            done.length = 0;
             tick();
           }, 5000);
         }
@@ -86,7 +97,10 @@ export default function HeroSection() {
     }
 
     tick();
-    return () => { cancelled = true; clearTimeout(timer); };
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
   }, []);
 
   return (
@@ -94,11 +108,6 @@ export default function HeroSection() {
       <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center gap-14 px-[5%] pb-20 pt-32 lg:flex-row">
         {/* Left: content */}
         <div className="min-w-0 flex-1">
-          <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-green/20 bg-green/10 px-3.5 py-1.5 text-[0.82rem] tracking-wide text-green">
-            <span className="inline-block h-[7px] w-[7px] animate-pulse2 rounded-full bg-green" />
-            Aberto a oportunidades
-          </p>
-
           <h1 className="mb-4 text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold leading-[1.12] tracking-tight text-white">
             Oi, eu sou
             <br />
@@ -106,13 +115,13 @@ export default function HeroSection() {
           </h1>
 
           <p className="mb-5 font-mono text-[0.88rem] text-muted">
-            Desenvolvedor Júnior <span className="mx-1 opacity-40">·</span> Estudante de SI{" "}
-            <span className="mx-1 opacity-40">·</span> 20 anos
+            Desenvolvedor Júnior <span className="mx-1 opacity-40">·</span>{" "}
+            Estudante de SI <span className="mx-1 opacity-40">·</span> 20 anos
           </p>
 
           <p className="mb-9 max-w-[480px] text-[1.05rem] text-[#cacaca]">
-            Apaixonado por resolver problemas com código. Atualmente estudando na{" "}
-            <strong>Faculdade Anhanguera</strong>.
+            Apaixonado por resolver problemas com código. Atualmente estudando
+            na <strong>Faculdade Anhanguera</strong>.
           </p>
 
           <div className="mb-10 flex flex-wrap gap-3">
@@ -148,7 +157,9 @@ export default function HeroSection() {
               <span className="inline-block h-3 w-3 rounded-full bg-red" />
               <span className="inline-block h-3 w-3 rounded-full bg-yellow" />
               <span className="inline-block h-3 w-3 rounded-full bg-green" />
-              <span className="ml-2 font-mono text-[0.78rem] text-muted">nycolas.js</span>
+              <span className="ml-2 font-mono text-[0.78rem] text-muted">
+                nycolas.js
+              </span>
             </div>
 
             <pre className="overflow-x-auto whitespace-pre px-6 py-5 font-mono text-[0.88rem] leading-[1.9]">
