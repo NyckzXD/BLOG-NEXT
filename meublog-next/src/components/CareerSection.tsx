@@ -4,13 +4,17 @@ import { SectionHeading } from "@/components/ui/section-heading";
 import { OriginButton } from "@/components/ui/origin-button";
 
 const CAREER_CARDS = [
-  { title: "Assistente de T.I", dates: "Nov 2024 – Atual" },
-  { title: "Estagiário em Desenvolvimento Web", dates: "Mar 2024 – Out 2024" },
+  { title: "Assistente de T.I", dates: "Nov 2025 – Atual" },
+  { title: "Assistente Administrativo", dates: "Mar 2024 – Out 2025" },
 ];
 
 const SKILLS_LIST = [
-  <>Estudante de <strong>Sistemas de Informação</strong> — Faculdade Anhanguera</>,
-  <>Experiência com <strong>Python, JavaScript, HTML/CSS, C++</strong> e Git</>,
+  <>
+    Estudante de <strong>Sistemas de Informação</strong> — Faculdade Anhanguera
+  </>,
+  <>
+    Experiência com <strong>Python, JavaScript, HTML/CSS, C++</strong> e Git
+  </>,
   <>Interesse em algoritmos, lógica e desafios técnicos</>,
   <>Buscando crescimento contínuo com cursos e projetos práticos</>,
   <>Aberto a colaborações e networking na área de tecnologia</>,
@@ -34,8 +38,12 @@ export default function CareerSection() {
                   <Briefcase size={18} />
                 </span>
                 <div>
-                  <div className="text-base font-semibold text-accent2">{card.title}</div>
-                  <div className="font-mono text-[0.83rem] text-muted">{card.dates}</div>
+                  <div className="text-base font-semibold text-accent2">
+                    {card.title}
+                  </div>
+                  <div className="font-mono text-[0.83rem] text-muted">
+                    {card.dates}
+                  </div>
                 </div>
               </article>
             </Reveal>
@@ -45,7 +53,10 @@ export default function CareerSection() {
         <Reveal delay={0.15}>
           <ul className="mb-10 flex flex-col gap-3">
             {SKILLS_LIST.map((item, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-[0.95rem] text-[#cacaca]">
+              <li
+                key={i}
+                className="flex items-start gap-2.5 text-[0.95rem] text-[#cacaca]"
+              >
                 <Sparkles size={15} className="mt-1 flex-none text-accent" />
                 {item}
               </li>
