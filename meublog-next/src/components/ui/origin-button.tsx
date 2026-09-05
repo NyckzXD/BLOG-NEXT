@@ -18,8 +18,14 @@ const lightThemeClassName =
 const darkThemeClassName =
   "[--ic-background:#111111] [--ic-foreground:#f6f3ec] [--ic-primary:#f6f3ec] [--ic-secondary:#cbc6bb] [--ic-surface-border:#2a2a25] [--ic-border:#2b2a25] [--ic-card:#111111] [--ic-card-foreground:#f6f3ec] [--ic-muted:#171716] [--ic-muted-foreground:#9a958a] [--ic-accent:#1a1a18] [--ic-accent-foreground:#f6f3ec] [--ic-input:#2b2a25] [--ic-ring:rgba(246,243,236,0.18)] [--ic-destructive:#f87171] [--ic-paper:#171716] [--ic-popover-foreground:#f6f3ec] [--ic-brand:#38bdf8] [--ic-brand-soft:#0c4a6e] [--ic-shadow-soft:0_20px_44px_-28px_rgba(0,0,0,0.6)] [--ic-chart-1:oklch(0.68_0.17_250)] [--ic-chart-2:oklch(0.82_0.09_225)] [--ic-chart-3:oklch(0.58_0.15_260)] [--ic-chart-4:oklch(0.75_0.12_235)] [--ic-chart-5:oklch(0.88_0.06_220)]";
 
+// The fill is animated with a CSS transition rather than Framer Motion: Framer
+// writes its own inline `transform`, which silently overrode the Tailwind
+// `-translate-x-1/2 -translate-y-1/2` used to centre the circle on the cursor,
+// leaving it anchored by its top-left corner. Owning the whole transform string
+// here keeps the centring and the scale in one place. Same duration/easing as
+// the button's text-colour transition so the two stay in step.
 const FILL_DURATION = 0.5;
-const FILL_EASE = [0.16, 1, 0.3, 1] as const;
+const FILL_EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
 
 type ButtonHTMLAttributesForMotion = Omit<
   React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -36,15 +42,10 @@ type ButtonHTMLAttributesForMotion = Omit<
   | "onDrop"
 >;
 
-// FILL_EASE is a steep ease-out: it covers ~90% of the distance almost
-// immediately and spends the rest of FILL_DURATION creeping through the
-// last stretch. A circle sized to *exactly* reach the farthest corner only
-// finishes covering that corner once scale hits 1 — i.e. right at the end
-// of that slow tail. Any interruption (mouse leaving early, a quick hover)
-// during that tail leaves a sliver of the corner uncovered, which reads as
-// "the fill stopped partway" / "never fully covers the button". Overshooting
-// the radius moves full corner coverage earlier into the fast part of the
-// curve, so it reads as complete well before scale actually reaches 1.
+// Sized to exactly reach the farthest corner, the circle only covers that
+// corner at scale 1 — the very end of FILL_EASE's slow tail. A small overshoot
+// gets the corners covered a bit earlier, so a hover that ends early still
+// reads as a complete fill.
 const COVER_OVERSHOOT = 1.15;
 
 function getCoverDiameter(width: number, height: number, x: number, y: number) {
@@ -205,8 +206,6 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
       return () => observer.disconnect();
     }, [showFill, origin.x, origin.y]);
 
-    const fillTransition = { duration: FILL_DURATION, ease: FILL_EASE };
-
     const setMergedRef = React.useCallback(
       (node: HTMLButtonElement | null) => {
         buttonRef.current = node;
@@ -324,21 +323,23 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
         type={href ? undefined : type}
         whileTap={isDisabled ? undefined : { scale: 0.985 }}
       >
-        <motion.span
-          animate={{ scale: showFill && coverSize > 0 ? 1 : 0 }}
+        <span
           aria-hidden
           className={cn(
-            "pointer-events-none absolute -translate-x-1/2 -translate-y-1/2 rounded-full",
+            "pointer-events-none absolute rounded-full",
             isLight ? "bg-[var(--color-foreground)]" : "bg-neutral-50"
           )}
-          initial={false}
           style={{
             height: coverSize,
             left: origin.x,
             top: origin.y,
             width: coverSize,
+            transform: `translate(-50%, -50%) scale(${
+              showFill && coverSize > 0 ? 1 : 0
+            })`,
+            transition: `transform ${FILL_DURATION}s ${FILL_EASE}`,
+            willChange: "transform",
           }}
-          transition={fillTransition}
         />
         <span className="relative z-10 inline-flex items-center justify-center gap-2">
           {children}
