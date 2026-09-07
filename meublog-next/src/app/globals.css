@@ -10,8 +10,23 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    /* O scroll suave fica por conta do Lenis (ver SmoothScroll). Manter
+       scroll-behavior: smooth aqui faria os dois brigarem nas âncoras. */
     overflow-x: hidden;
+  }
+
+  /* Recomendado pelo Lenis */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+
+  .lenis:not(.lenis-autoToggle).lenis-stopped {
+    overflow: clip;
+  }
+
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
   }
 
   body {
