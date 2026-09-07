@@ -3,6 +3,11 @@
 import { motion } from "motion/react";
 import type { ReactNode } from "react";
 
+/**
+ * Revela o conteúdo quando ele entra na viewport (uma vez só).
+ * Antes a animação disparava na montagem, o que fazia as seções de baixo
+ * já chegarem animadas quando o usuário rolava até elas.
+ */
 export function Reveal({
   children,
   delay = 0,
@@ -15,9 +20,10 @@ export function Reveal({
   return (
     <motion.div
       className={className}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2, margin: "0px 0px -12% 0px" }}
+      transition={{ duration: 0.65, delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
