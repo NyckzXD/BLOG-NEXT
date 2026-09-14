@@ -12,7 +12,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3-88CE02?style=flat-square&logo=greensock&logoColor=black)
 
-🔗 **[https://nycolas.dev](https://nycolas.dev)**
+**[https://nycolas.dev](https://nycolas.dev)**
 
 </div>
 
@@ -35,14 +35,14 @@ Site de portfólio desenvolvido com **Next.js (App Router)** e **TypeScript**, c
 
 ## Tecnologias
 
-| Categoria    | Ferramentas                                                   |
-| ------------ | ------------------------------------------------------------- |
-| Framework    | [Next.js 14](https://nextjs.org/) (App Router), React 18      |
-| Linguagem    | TypeScript                                                    |
-| Estilização  | Tailwind CSS, PostCSS, `clsx`, `tailwind-merge`, CVA          |
-| Animações    | [GSAP](https://gsap.com/), [Motion](https://motion.dev/), [Lenis](https://lenis.darkroom.engineering/) |
-| Ícones       | [Lucide](https://lucide.dev/)                                 |
-| Dados        | GitHub REST API                                               |
+| Categoria   | Ferramentas                                                                                            |
+| ----------- | ------------------------------------------------------------------------------------------------------ |
+| Framework   | [Next.js 14](https://nextjs.org/) (App Router), React 18                                               |
+| Linguagem   | TypeScript                                                                                             |
+| Estilização | Tailwind CSS, PostCSS, `clsx`, `tailwind-merge`, CVA                                                   |
+| Animações   | [GSAP](https://gsap.com/), [Motion](https://motion.dev/), [Lenis](https://lenis.darkroom.engineering/) |
+| Ícones      | [Lucide](https://lucide.dev/)                                                                          |
+| Dados       | GitHub REST API                                                                                        |
 
 ## Estrutura
 
@@ -94,12 +94,12 @@ Acesse [http://localhost:3000](http://localhost:3000).
 
 ### Scripts
 
-| Comando         | Descrição                               |
-| --------------- | --------------------------------------- |
-| `npm run dev`   | Inicia o servidor de desenvolvimento    |
-| `npm run build` | Gera o build de produção                |
-| `npm run start` | Serve o build de produção               |
-| `npm run lint`  | Executa o ESLint                        |
+| Comando         | Descrição                            |
+| --------------- | ------------------------------------ |
+| `npm run dev`   | Inicia o servidor de desenvolvimento |
+| `npm run build` | Gera o build de produção             |
+| `npm run start` | Serve o build de produção            |
+| `npm run lint`  | Executa o ESLint                     |
 
 ## Deploy
 
@@ -107,10 +107,10 @@ O site está publicado em **[nycolas.dev](https://nycolas.dev)**. Por ser uma ap
 
 ## Contato
 
-- 🌐 Site: [nycolas.dev](https://nycolas.dev)
-- 💻 GitHub: [@NyckzXD](https://github.com/NyckzXD)
-- 📸 Instagram: [@nycolasfe_](https://www.instagram.com/nycolasfe_/)
-- ✉️ E-mail: [nycolas.tec@gmail.com](mailto:nycolas.tec@gmail.com)
+- Site: [nycolas.dev](https://nycolas.dev)
+- GitHub: [@NyckzXD](https://github.com/NyckzXD)
+- Instagram: [@nycolasfe\_](https://www.instagram.com/nycolasfe_/)
+- E-mail: [nycolas.tec@gmail.com](mailto:nycolas.tec@gmail.com)
 
 ---
 
