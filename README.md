@@ -12,7 +12,7 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)
 ![GSAP](https://img.shields.io/badge/GSAP-3-88CE02?style=flat-square&logo=greensock&logoColor=black)
 
-**[https://nycolas.dev](www.nycolas.dev)**
+**[https://nycolas.dev](https://www.nycolas.dev/)**
 
 </div>
 
