@@ -20,6 +20,11 @@ export function SmoothScroll() {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
 
+    // No mobile, mostrar/esconder a barra de endereço muda a viewport e o
+    // ScrollTrigger refazia as marcações no meio do scroll — o que aparece
+    // como a cena de parallax "teleportando". Isso aqui ignora esse resize.
+    ScrollTrigger.config({ ignoreMobileResize: true });
+
     const reduceMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
@@ -63,10 +68,18 @@ export function SmoothScroll() {
 
     // A lista de repositórios chega por fetch e muda a altura da página:
     // sem esse refresh o ScrollTrigger fica com as marcações antigas.
+    // Mas o observer dispara em qualquer mudança de caixa, inclusive largura
+    // e conteúdo animado — e um refresh no meio do scroll faz as camadas do
+    // parallax saltarem. Então só reage a mudança real de altura.
     let refreshTimer: ReturnType<typeof setTimeout>;
+    let lastHeight = document.body.scrollHeight;
     const observer = new ResizeObserver(() => {
+      if (document.body.scrollHeight === lastHeight) return;
       clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(() => ScrollTrigger.refresh(), 150);
+      refreshTimer = setTimeout(() => {
+        lastHeight = document.body.scrollHeight;
+        ScrollTrigger.refresh();
+      }, 250);
     });
     observer.observe(document.body);
 
