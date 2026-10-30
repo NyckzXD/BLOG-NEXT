@@ -68,15 +68,17 @@ export function ParallaxScene({ className }: { className?: string }) {
       ref={rootRef}
       aria-label="Transição visual"
       /* sem animação (motion-reduce) a cena vira uma seção normal de 100vh */
-      className={cn("relative h-[200vh] w-full motion-reduce:h-screen", className)}
+      /* svh em vez de vh: no mobile o vh acompanha a barra de endereço e a
+         cena era redimensionada no meio do scroll. O svh é estável. */
+      className={cn("relative h-[200svh] w-full motion-reduce:h-svh", className)}
     >
       {/* Janela fixa: o conteúdo trava enquanto as camadas deslizam */}
-      <div className="sticky top-0 h-screen w-full overflow-hidden bg-bg">
+      <div className="sticky top-0 h-svh w-full overflow-hidden bg-bg">
         <div data-parallax-layers className="absolute inset-0">
           {/* 1 — céu, brilho do horizonte e poeira estelar */}
           <div
             data-parallax-layer="1"
-            className="absolute inset-x-0 bottom-0 h-[62vh] will-change-transform"
+            className="absolute inset-x-0 bottom-0 h-[62svh] will-change-transform"
           >
             <div className="absolute inset-x-0 bottom-0 h-full bg-[radial-gradient(70%_100%_at_50%_100%,rgba(244,244,245,0.16),rgba(244,244,245,0.04)_45%,transparent_70%)]" />
             {DOTS.map(([left, top]) => (
@@ -96,7 +98,7 @@ export function ParallaxScene({ className }: { className?: string }) {
           {/* 2 — serra intermediária */}
           <div
             data-parallax-layer="2"
-            className="absolute inset-x-0 bottom-0 h-[44vh] will-change-transform"
+            className="absolute inset-x-0 bottom-0 h-[44svh] will-change-transform"
           >
             <Ridge
               d="M0 200 L0 128 L120 150 L240 110 L370 148 L500 104 L640 152 L780 116 L920 158 L1060 122 L1200 160 L1330 130 L1440 156 L1440 200 Z"
@@ -124,7 +126,7 @@ export function ParallaxScene({ className }: { className?: string }) {
           {/* 4 — serra da frente */}
           <div
             data-parallax-layer="4"
-            className="absolute inset-x-0 bottom-0 h-[26vh] will-change-transform"
+            className="absolute inset-x-0 bottom-0 h-[26svh] will-change-transform"
           >
             <Ridge
               d="M0 200 L0 158 L160 172 L320 150 L500 178 L680 152 L860 180 L1040 158 L1220 182 L1440 162 L1440 200 Z"

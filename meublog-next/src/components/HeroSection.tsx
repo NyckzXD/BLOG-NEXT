@@ -37,6 +37,12 @@ function escHtml(s: string) {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+/**
+ * Linha vazia de reserva. O nbsp garante altura de linha de verdade — sem ele
+ * o navegador descarta a quebra final e a caixa encolhe.
+ */
+const FILLER = " ";
+
 const SOCIALS = [
   { href: "https://github.com/NyckzXD", icon: Github, label: "GitHub" },
   {
@@ -59,13 +65,22 @@ export default function HeroSection() {
     let timer: ReturnType<typeof setTimeout>;
     let cancelled = false;
 
-    function render() {
+    /**
+     * Pinta sempre CODE_LINES.length linhas, completando com linhas vazias.
+     * A caixa de código precisa ter altura constante: no mobile o hero empilha
+     * e cada linha nova mudava a altura da página inteira, o que disparava o
+     * ResizeObserver do SmoothScroll, refazia o ScrollTrigger e fazia a cena
+     * de parallax saltar a cada ~1s.
+     */
+    function paint(lines: string[]) {
       if (!el) return;
+      const missing = Math.max(0, CODE_LINES.length - lines.length);
+      el.innerHTML = [...lines, ...Array(missing).fill(FILLER)].join("\n");
+    }
+
+    function render() {
       const partial = escHtml(CODE_LINES[lineIdx].raw.slice(0, charIdx));
-      el.innerHTML = [
-        ...done,
-        partial + '<span class="code-cursor"></span>',
-      ].join("\n");
+      paint([...done, partial + '<span class="code-cursor"></span>']);
     }
 
     function tick() {
@@ -82,9 +97,9 @@ export default function HeroSection() {
         if (lineIdx < CODE_LINES.length) {
           timer = setTimeout(tick, 160);
         } else {
-          if (el)
-            el.innerHTML =
-              done.join("\n") + '<span class="code-cursor"></span>';
+          const full = [...done];
+          full[full.length - 1] += '<span class="code-cursor"></span>';
+          paint(full);
           timer = setTimeout(() => {
             if (cancelled) return;
             lineIdx = 0;
