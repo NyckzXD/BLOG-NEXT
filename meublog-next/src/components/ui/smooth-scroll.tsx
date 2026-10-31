@@ -40,6 +40,111 @@ function anchorDuration(distance: number) {
   return Math.min(1.4, Math.max(0.65, Math.abs(distance) / 2200));
 }
 
+/**
+ * Quanto a tela muda por pixel de scroll dentro de uma cena presa, quando a
+ * própria cena não diz. Ver sceneSegments.
+ */
+const DEFAULT_SCENE_WEIGHT = 0.2;
+
+type Segment = { from: number; to: number; weight: number };
+
+/**
+ * Trechos de scroll em que a página rola mas a tela quase não muda.
+ *
+ * A cena do parallax (`[data-sticky-scene]`) tem 200svh de altura com o
+ * conteúdo em `sticky`: durante uma viewport inteira de scroll o que se vê
+ * fica preso no lugar, mexendo só o arrasto das camadas. Rolando na roda do
+ * mouse isso é o efeito pretendido; numa âncora, que atravessa o trecho em
+ * velocidade máxima, o movimento aparente despencava ~15x e voltava de
+ * supetão — o "travamento" no meio da transição.
+ *
+ * O número no atributo é o peso: 0.2 quer dizer que 1px de scroll ali vale
+ * 0.2px de movimento na tela.
+ */
+function sceneSegments(): Segment[] {
+  const viewport = window.innerHeight;
+
+  return Array.from(
+    document.querySelectorAll<HTMLElement>("[data-sticky-scene]")
+  )
+    .map((el) => {
+      const rect = el.getBoundingClientRect();
+      const from = rect.top + window.scrollY;
+      const weight = Number(el.dataset.stickyScene);
+      return {
+        from,
+        // A cena só fica presa enquanto sobra altura dela abaixo da viewport.
+        to: from + rect.height - viewport,
+        weight: weight > 0 ? weight : DEFAULT_SCENE_WEIGHT,
+      };
+    })
+    .filter((segment) => segment.to > segment.from)
+    .sort((a, b) => a.from - b.from);
+}
+
+/**
+ * Monta o easing do trajeto em cima do movimento aparente, não do scroll.
+ *
+ * O ease-in-out passa a reger quanto a *tela* muda; onde a cena está presa,
+ * o scroll corre mais rápido para compensar. Assim a transição não para no
+ * meio — e, como o custo total ignora o que não se vê, a duração também não
+ * infla por causa dos 200svh da cena.
+ */
+function buildAnchorTravel(from: number, to: number) {
+  const distance = to - from;
+  const span = Math.abs(distance);
+  const low = Math.min(from, to);
+  const high = Math.max(from, to);
+
+  // Trajeto fatiado em trechos de peso 1 (normal) e peso da cena.
+  const segments: Segment[] = [];
+  let cursor = low;
+  for (const scene of sceneSegments()) {
+    const start = Math.max(low, scene.from);
+    const end = Math.min(high, scene.to);
+    if (end <= start) continue;
+    if (start > cursor) segments.push({ from: cursor, to: start, weight: 1 });
+    segments.push({ from: start, to: end, weight: scene.weight });
+    cursor = end;
+  }
+  if (cursor < high) segments.push({ from: cursor, to: high, weight: 1 });
+  // Os trechos saem em ordem de posição; a viagem pode ser para cima.
+  if (distance < 0) segments.reverse();
+
+  const cost = segments.reduce(
+    (total, segment) => total + (segment.to - segment.from) * segment.weight,
+    0
+  );
+
+  if (span === 0 || cost === 0) {
+    return { duration: anchorDuration(span), easing: anchorEasing };
+  }
+
+  return {
+    duration: anchorDuration(cost),
+    /** t (tempo) -> fração da distância já percorrida. */
+    easing: (t: number) => {
+      let remaining = anchorEasing(t) * cost;
+      let travelled = 0;
+
+      for (const segment of segments) {
+        const length = segment.to - segment.from;
+        const segmentCost = length * segment.weight;
+        if (remaining >= segmentCost) {
+          remaining -= segmentCost;
+          travelled += length;
+          continue;
+        }
+        travelled += remaining / segment.weight;
+        remaining = 0;
+        break;
+      }
+
+      return Math.min(1, travelled / span);
+    },
+  };
+}
+
 // Quem quiser pausar trabalho pesado enquanto a página viaja até a seção
 // (ver HeroSection) observa este sinal.
 let anchorScrolling = false;
@@ -126,7 +231,7 @@ export function SmoothScroll() {
           : (target as HTMLElement).getBoundingClientRect().top +
             window.scrollY +
             NAV_OFFSET;
-      const duration = anchorDuration(destination - lenis.scroll);
+      const { duration, easing } = buildAnchorTravel(lenis.scroll, destination);
 
       setAnchorScrolling(true);
       // Rede de segurança: se o usuário interromper com a roda do mouse o
@@ -138,7 +243,7 @@ export function SmoothScroll() {
 
       lenis.scrollTo(destination, {
         duration,
-        easing: anchorEasing,
+        easing,
         onComplete: () => setAnchorScrolling(false),
       });
 
