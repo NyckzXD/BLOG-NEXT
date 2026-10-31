@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Lenis from "lenis";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -10,6 +10,62 @@ let lenisInstance: Lenis | null = null;
 /** Instância global do Lenis (null se o usuário pediu menos movimento). */
 export function getLenis() {
   return lenisInstance;
+}
+
+/** Altura da navbar fixa: a seção precisa parar logo abaixo dela. */
+const NAV_OFFSET = -72;
+
+/**
+ * Ease-in-out cúbico para o scroll das âncoras.
+ *
+ * O easing do Lenis (expo-out, abaixo) é certo para a roda do mouse — a
+ * inércia tem que começar na velocidade do gesto e desacelerar. Para um
+ * clique em âncora ele é péssimo: entrega ~97% da distância na primeira
+ * metade do tempo, então o primeiro frame dá um salto grande (num trajeto de
+ * 3000px, centenas de pixels de uma vez) e o resto chega rastejando a 1px por
+ * frame. Os dois extremos é que se sentiam como travamento. O in-out arranca
+ * do zero e chega no zero, sem salto nem arrasto.
+ */
+const anchorEasing = (t: number) =>
+  t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+/**
+ * Duração proporcional à distância, em vez de fixa.
+ *
+ * Com duração fixa o mesmo 1.2s tinha que cobrir um pulo curto e a travessia
+ * inteira da página — o que deixa o trajeto longo numa velocidade média
+ * absurda (~2600px/s) e o curto lento demais. ~2200px/s, com piso e teto.
+ */
+function anchorDuration(distance: number) {
+  return Math.min(1.4, Math.max(0.65, Math.abs(distance) / 2200));
+}
+
+// Quem quiser pausar trabalho pesado enquanto a página viaja até a seção
+// (ver HeroSection) observa este sinal.
+let anchorScrolling = false;
+const anchorListeners = new Set<(value: boolean) => void>();
+let anchorFallbackTimer: ReturnType<typeof setTimeout> | undefined;
+
+function setAnchorScrolling(value: boolean) {
+  clearTimeout(anchorFallbackTimer);
+  if (anchorScrolling === value) return;
+  anchorScrolling = value;
+  anchorListeners.forEach((listener) => listener(value));
+}
+
+/** true enquanto um clique em âncora está levando a página até a seção. */
+export function useAnchorScrolling() {
+  const [value, setValue] = useState(anchorScrolling);
+
+  useEffect(() => {
+    setValue(anchorScrolling);
+    anchorListeners.add(setValue);
+    return () => {
+      anchorListeners.delete(setValue);
+    };
+  }, []);
+
+  return value;
 }
 
 /**
@@ -57,11 +113,35 @@ export function SmoothScroll() {
       const href = anchor?.getAttribute("href");
       if (!href || !href.startsWith("#")) return;
 
-      const target = href === "#" ? 0 : document.querySelector(href);
+      const target = href === "#" ? null : document.querySelector(href);
       if (href !== "#" && !target) return;
 
       e.preventDefault();
-      lenis.scrollTo(target as HTMLElement | 0, { offset: -72, duration: 1.2 });
+
+      // Posição final em pixels, calculada aqui para dar a duração do
+      // trajeto ao Lenis em vez de um valor fixo.
+      const destination =
+        target === null
+          ? 0
+          : (target as HTMLElement).getBoundingClientRect().top +
+            window.scrollY +
+            NAV_OFFSET;
+      const duration = anchorDuration(destination - lenis.scroll);
+
+      setAnchorScrolling(true);
+      // Rede de segurança: se o usuário interromper com a roda do mouse o
+      // onComplete não chega, e o sinal não pode ficar preso em true.
+      anchorFallbackTimer = setTimeout(
+        () => setAnchorScrolling(false),
+        duration * 1000 + 400
+      );
+
+      lenis.scrollTo(destination, {
+        duration,
+        easing: anchorEasing,
+        onComplete: () => setAnchorScrolling(false),
+      });
+
       if (href !== "#") history.replaceState(null, "", href);
     };
     document.addEventListener("click", onClick);
@@ -87,6 +167,7 @@ export function SmoothScroll() {
       document.removeEventListener("click", onClick);
       observer.disconnect();
       clearTimeout(refreshTimer);
+      setAnchorScrolling(false);
       gsap.ticker.remove(raf);
       lenis.destroy();
       lenisInstance = null;

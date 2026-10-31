@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Github, Instagram, ArrowRight, Mail } from "lucide-react";
 import { FloatingPathsBackground } from "@/components/ui/floating-paths";
 import { OriginButton } from "@/components/ui/origin-button";
+import { useAnchorScrolling } from "@/components/ui/smooth-scroll";
 
 const CODE_LINES = [
   {
@@ -54,6 +55,33 @@ const SOCIALS = [
 
 export default function HeroSection() {
   const codeRef = useRef<HTMLElement>(null);
+  const anchorScrolling = useAnchorScrolling();
+  const [onScreen, setOnScreen] = useState(true);
+  const pausedRef = useRef(false);
+
+  /**
+   * A digitação reescreve o innerHTML da caixa de código a cada ~40ms, e cada
+   * reescrita obriga o navegador a recalcular estilo e layout daquele bloco.
+   * Durante o scroll das âncoras isso disputa a thread principal com o
+   * parallax e aparece como engasgo. Parar a digitação nessa 1s e pouco é
+   * invisível (ela continua exatamente de onde parou), e fora da tela o
+   * trabalho não serve para nada.
+   */
+  useEffect(() => {
+    pausedRef.current = anchorScrolling || !onScreen;
+  }, [anchorScrolling, onScreen]);
+
+  useEffect(() => {
+    const el = codeRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      { rootMargin: "120px" }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const el = codeRef.current;
@@ -85,6 +113,10 @@ export default function HeroSection() {
 
     function tick() {
       if (cancelled) return;
+      if (pausedRef.current) {
+        timer = setTimeout(tick, 200);
+        return;
+      }
       const line = CODE_LINES[lineIdx];
       if (charIdx < line.raw.length) {
         charIdx++;
