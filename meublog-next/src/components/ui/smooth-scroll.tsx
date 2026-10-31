@@ -12,8 +12,19 @@ export function getLenis() {
   return lenisInstance;
 }
 
-/** Altura da navbar fixa: a seção precisa parar logo abaixo dela. */
-const NAV_OFFSET = -72;
+/**
+ * Quanto a seção precisa parar abaixo do topo, para não ficar atrás da navbar
+ * fixa. O valor mora no `--nav-offset` do globals.css, que é também de onde o
+ * `scroll-margin-top` das seções lê — assim o caminho do Lenis e o caminho
+ * nativo do navegador não podem divergir. A navbar usa o mesmo número para
+ * decidir qual seção está ativa.
+ */
+export function navOffset() {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue(
+    "--nav-offset"
+  );
+  return parseFloat(raw) || 72;
+}
 
 /**
  * Ease-in-out cúbico para o scroll das âncoras.
@@ -237,8 +248,8 @@ export function SmoothScroll() {
         target === null
           ? 0
           : (target as HTMLElement).getBoundingClientRect().top +
-            window.scrollY +
-            NAV_OFFSET;
+            window.scrollY -
+            navOffset();
       const { duration, easing } = buildAnchorTravel(lenis.scroll, destination);
 
       setAnchorScrolling(true);

@@ -23,10 +23,20 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1 a 10** da tabela de prioridade foram aplicados em 31/10/2026
-e verificados no navegador (`npx next build` passa; medições abaixo em cada
-seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
-componente. Os demais seguem em aberto.
+**Os 12 itens da tabela de prioridade foram aplicados**, em 31/10/2026, e
+verificados no navegador (`npx next build` passa; as medições estão em cada
+seção). O item 4 resolveu junto o 11 (§7.1 e §7.2), que dependia do mesmo
+componente.
+
+Seguem em aberto os achados que **não** viraram item de tabela — estão
+marcados seção por seção abaixo. Os principais: o typewriter do hero continua
+rodando em loop para quem não pediu menos movimento (§3.4); as três
+bibliotecas de animação continuam no bundle (§3.3); o menu mobile não fecha no
+`Escape` nem ao clicar fora (§1.5); não existe feedback de pressionado em
+touch (§2.3); a borda dos cards tem 1,27:1 contra o preto, abaixo do 3:1 que
+o WCAG pede para limites de UI (§6); o `.career-card:hover` ainda usa o
+padrão de translate que não renderiza (§2.2b); e a pasta `public/` não existe
+— sem favicon, sem imagem OG, sem `metadataBase`.
 
 ---
 
@@ -662,21 +672,77 @@ sem handler registrado.
 
 ## 8. Navegação (ALTO)
 
-### 8.1 Sem indicação de seção atual — `nav-state-active`
+### 8.1 ✅ CORRIGIDO — Sem indicação de seção atual — `nav-state-active`
 
-Os três links (`#sobre`, `#projetos`, `#carreira`) nunca mudam de estado. Numa
-one-page longa com parallax, o visitante não tem referência de onde está. Falta
-scroll-spy + `aria-current="location"`. É a lacuna de navegação mais visível.
+Os três links (`#sobre`, `#projetos`, `#carreira`) nunca mudavam de estado.
+Numa one-page longa com parallax, o visitante não tinha referência de onde
+estava. Faltava scroll-spy + `aria-current="location"`.
 
-### 8.2 O offset da navbar só existe no caminho do Lenis
+**Aplicado:** o listener de scroll que a navbar já tinha (para a barra ficar
+opaca) passou a calcular também a seção ativa, em vez de um segundo listener.
 
-`smooth-scroll.tsx:215-252` intercepta **todo** clique em `a[href^="#"]` com
+**A regra é "a última seção cuja borda superior já passou pela navbar", não "a
+que está visível".** A diferença importa por causa da cena de parallax: ela
+fica entre "sobre" e "projetos", ocupa a tela inteira e não é seção nenhuma.
+Com a regra do visível, nenhum link ficaria aceso durante a travessia e o
+estado piscaria. Medido com rolagem de verdade:
+
+```
+scrollY    0 → nenhum      (hero)
+scrollY  800 → sobre
+scrollY 1800 → sobre       ← dentro da cena de parallax, o estado se mantém
+scrollY 2800 → sobre       (#projetos começa em 2964)
+scrollY 3800 → projetos    (#carreira começa em 3978)
+scrollY 4212 → carreira
+```
+
+O estado ativo é cor **mais** uma barra de 1px embaixo do link, não só cor
+(`color-not-only`). A barra existe sempre e só troca de opacidade, para a
+altura do link não mudar quando a seção muda. No painel mobile, onde não cabe
+barra, o papel é de um ponto à direita. Verificado: só o link ativo tem
+`aria-current="location"`, texto `#f5f5f5` e barra em opacidade 1; os outros
+ficam em `#a1a1aa` com a barra em 0.
+
+**Um bug que só apareceu ao verificar.** Logo depois de clicar em "carreira" a
+navbar ainda acendia "sobre". As posições das seções eram medidas uma vez, na
+montagem — e a altura do documento ainda muda depois disso (troca da fonte de
+fallback pela real, barra de endereço no mobile), então o cache nascia errado.
+Um `resize` qualquer corrigia sozinho, o que mascarava o problema. Agora um
+`ResizeObserver` no `body` remede quando a altura muda, com a mesma guarda de
+altura que o `SmoothScroll` já usava, e `document.fonts.ready` cobre a troca
+de fonte.
+
+Medir uma vez e remedir sob demanda, em vez de ler `getBoundingClientRect` a
+cada frame, é de propósito: com o Lenis o evento de scroll chega a cada frame,
+e este projeto já teve briga por thread principal (§3.4).
+
+### 8.2 ✅ CORRIGIDO — O offset da navbar só existe no caminho do Lenis
+
+`smooth-scroll.tsx` intercepta **todo** clique em `a[href^="#"]` com
 `preventDefault()` e delega ao Lenis. Com `prefers-reduced-motion` ativo o
-`SmoothScroll` retorna antes (linha 194) e cai no `scroll-behavior: smooth`
-nativo ✅. Mas o `NAV_OFFSET = -72` que compensa a navbar fixa **só existe no
-caminho do Lenis** — com motion reduzido, ou antes da hidratação, o alvo para
-atrás da navbar de 64px. Correção: `scroll-margin-top` nas `<section>`, que
-funciona nos dois caminhos.
+`SmoothScroll` retorna antes e cai no `scroll-behavior: smooth` nativo ✅. Mas
+o `NAV_OFFSET = -72` que compensa a navbar fixa **só existia no caminho do
+Lenis** — com motion reduzido, ou antes da hidratação, o alvo parava atrás da
+navbar de 64px.
+
+**Aplicado:** `scroll-margin-top` nas `<section>` e no `<main>`, que funciona
+nos dois caminhos.
+
+E o número deixou de existir em dois lugares. Ele agora mora em um
+`--nav-offset: 72px` no `:root`; o `scroll-margin-top` lê a variável direto, e
+o `SmoothScroll` e a navbar leem pelo helper `navOffset()`, que faz
+`parseFloat` do valor computado. Antes havia o risco clássico: alguém mudar a
+altura da navbar, ajustar um dos dois e deixar o outro para trás.
+
+Verificado nos dois caminhos, com o `#carreira`:
+
+```
+clique na navbar (Lenis)        → topo da seção em 72px
+carregar /#carreira direto      → topo da seção em 72px   ← o caminho nativo
+```
+
+O segundo é o que estava quebrado: antes da hidratação quem resolve o
+fragmento é o navegador, e ele não conhecia o `NAV_OFFSET`.
 
 ---
 
@@ -695,7 +761,7 @@ funciona nos dois caminhos.
 | 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js`, todos os componentes, `globals.css` | médio | ✅ feito |
 | 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css`, `ProjectsSection.tsx`, `tailwind.config.js` | médio | ✅ feito |
 | 11 | Estado vazio + recuperação nos projetos (§7.1, §7.2) | `ProjectsSection.tsx` | baixo | ✅ saiu junto com o 4 |
-| 12 | Scroll-spy na navbar + `scroll-margin-top` (§8.1, §8.2) | `Navbar.tsx`, `globals.css` | médio | — |
+| 12 | Scroll-spy na navbar + `scroll-margin-top` (§8.1, §8.2) | `Navbar.tsx`, `globals.css`, `ui/smooth-scroll.tsx` | médio | ✅ feito |
 
 ## Fora do escopo do plugin, mas adjacente
 
