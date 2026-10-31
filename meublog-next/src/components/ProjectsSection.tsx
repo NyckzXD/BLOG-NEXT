@@ -90,16 +90,27 @@ export default async function ProjectsSection() {
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {repos.map((repo, i) => (
               <Reveal key={repo.id} delay={(i % 3) * 0.08}>
-                <div className="repo-card h-full">
+                <div className="repo-card relative h-full">
                   <div className="flex items-center gap-2 text-[0.95rem] font-semibold text-accent2">
                     <BookOpen size={15} className="text-muted" />
+                    {/*
+                      Stretched link: o ::after cobre o card inteiro, então
+                      clicar em qualquer ponto abre o repositório — antes só o
+                      texto do título era clicável, embora o card inteiro se
+                      levantasse no hover.
+
+                      O `truncate` saiu do <a> e foi para o <span> de dentro
+                      de propósito: `truncate` traz `overflow: hidden`, que
+                      recortaria o ::after no tamanho do próprio texto e
+                      anularia a área estendida.
+                    */}
                     <a
                       href={repo.html_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="truncate hover:underline"
+                      className="min-w-0 after:absolute after:inset-0 hover:underline"
                     >
-                      {repo.name}
+                      <span className="block truncate">{repo.name}</span>
                     </a>
                     <ArrowUpRight size={13} className="ml-auto flex-none text-muted" />
                   </div>

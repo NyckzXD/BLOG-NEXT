@@ -23,7 +23,7 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1, 2, 3, 4 e 5** da tabela de prioridade foram aplicados em 31/10/2026
+Os itens **1 a 6** da tabela de prioridade foram aplicados em 31/10/2026
 e verificados no navegador (`npx next build` passa; medições abaixo em cada
 seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
 componente. Os demais seguem em aberto.
@@ -147,16 +147,61 @@ O CTA "contato" da navbar não estava no levantamento original: o `h-9` no
 
 Em 375px não há scroll horizontal (`scrollWidth === innerWidth === 375`).
 
-### 2.2 O card de projeto parece clicável mas não é — `hover-vs-tap`
+### 2.2 ✅ CORRIGIDO — O card de projeto parecia clicável mas não era — `hover-vs-tap`
 
-`.repo-card:hover` levanta o card e muda a borda, sugerindo que o card inteiro é
-um link — mas só o texto do título é `<a>` (`ProjectsSection.tsx:77`). Clicar em
-qualquer outro ponto do card não faz nada. O plugin recomenda justamente
-"Project Card Hover" como CTA primário deste pattern.
+`.repo-card:hover` muda a borda e a sombra, sugerindo que o card inteiro é um
+link — mas só o texto do título era `<a>`. Clicar em qualquer outro ponto não
+fazia nada. O plugin recomenda justamente "Project Card Hover" como CTA
+primário deste pattern.
 
-Correção: envolver o card no `<a>`, ou usar um overlay stretched-link
-(`<a className="absolute inset-0">` + card `relative`), mantendo o `<h3>` como
-nome acessível.
+**Aplicado:** stretched link — o card ganhou `relative` e o `<a>` do título
+ganhou `after:absolute after:inset-0`. Preferido a envolver o card inteiro num
+`<a>` porque mantém o nome acessível do link curto (só o nome do repositório,
+não a descrição + estrelas + linguagem).
+
+Um detalhe que quebra essa técnica em silêncio: o `truncate` **saiu do `<a>`**
+e foi para um `<span>` interno. `truncate` traz `overflow: hidden`, que
+recortaria o `::after` no tamanho do texto e anularia a área estendida.
+
+Verificado amostrando quatro pontos do card (294×246px) com
+`document.elementFromPoint`:
+
+```
+topoEsq: abre o repo | meio: abre o repo | statsRodape: abre o repo | cantoInfDir: abre o repo
+::after → position: absolute, inset 0 0 0 0
+truncamento preservado: overflow hidden + text-overflow ellipsis no <span>
+```
+
+Isso também resolve a última linha de §2.1: o alvo do título saiu de ~22px de
+altura para o card inteiro.
+
+**Paridade de teclado:** `.repo-card:focus-within` foi somado ao `:hover`.
+Agora que o card inteiro é o link, quem chega pelo teclado recebe o mesmo
+retorno visual de quem chega pelo mouse (medido: hover e foco produzem
+exatamente o mesmo transform e a mesma sombra).
+
+### 2.2b 🐛 Achado novo — o "levanta no hover" nunca acontecia
+
+Ao verificar a paridade acima, o card não se movia nem no hover nem no foco.
+Não era regressão: as utilities de translate do Tailwind montam o transform a
+partir de custom properties (`translate(var(--tw-translate-x), …)`), e
+interpolar isso a partir de `transform: none` com `transition-all` travava.
+Medido no navegador:
+
+```
+:hover e :focus-within  → matrix(1, 0, 0, 1, 0, 0)   // identidade, sem deslocamento
+mesma regra, transition desligada → matrix(1, 0, 0, 1, 0, -4)  // os 4px existem
+```
+
+Corrigido em `.repo-card` trocando `-translate-y-1` por `translateY(0)` no
+estado base e `translateY(-4px)` no hover/foco — valores diretos interpolam
+normalmente. Confirmado depois: `0 → -3.5 → -4px` ao longo da transição, e o
+topo do card sobe de 260,7 para 256,7.
+
+**Ainda em aberto:** `.career-card:hover` e `.btn-ghost:hover` seguem com o
+padrão antigo baseado em variáveis, então o deslocamento deles também não
+renderiza. `.btn-primary` tem o mesmo problema, mas é código morto (§4.2).
+Ficaram de fora por pertencerem a outros itens da fila.
 
 ### 2.3 Feedback só no hover
 
@@ -429,7 +474,7 @@ funciona nos dois caminhos.
 | 3 | `next/font` e remover o `@import` duplicado (§3.1) | `layout.tsx`, `globals.css:1`, `tailwind.config.js` | baixo | ✅ feito |
 | 4 | Repos via Server Component com `revalidate` (§3.2) | `ProjectsSection.tsx` | médio | ✅ feito |
 | 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx`, `globals.css` | baixo | ✅ feito |
-| 6 | Card de projeto clicável inteiro (§2.2) | `ProjectsSection.tsx:74` | baixo | — |
+| 6 | Card de projeto clicável inteiro (§2.2, §2.2b) | `ProjectsSection.tsx`, `globals.css` | baixo | ✅ feito |
 | 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx` | baixo | — |
 | 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | todas as seções | baixo | — |
 | 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js` | médio | — |

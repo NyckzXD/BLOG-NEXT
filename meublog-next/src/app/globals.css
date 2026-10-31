@@ -98,9 +98,22 @@
 
   .repo-card {
     @apply flex flex-col gap-3 rounded-xl border border-border bg-bg p-5 transition-all duration-200;
+    /* translateY explícito nos dois estados, em vez de `-translate-y-1`.
+       As utilities de translate do Tailwind montam o transform a partir de
+       custom properties (`translate(var(--tw-translate-x), ...)`), e
+       interpolar isso a partir de `transform: none` trava: medido no
+       navegador, o card ficava em matrix(1,0,0,1,0,0) para sempre — ou seja,
+       o "levanta no hover" nunca acontecia. Com a transição desligada os 4px
+       aparecem, o que confirma a causa. Valores diretos interpolam normal. */
+    transform: translateY(0);
   }
-  .repo-card:hover {
-    @apply -translate-y-1 border-accent2/35 shadow-card;
+  /* focus-within junto do hover: agora que o card inteiro é o link (stretched
+     link em ProjectsSection), quem chega pelo teclado precisa do mesmo retorno
+     visual de quem chega pelo mouse. */
+  .repo-card:hover,
+  .repo-card:focus-within {
+    @apply border-accent2/35 shadow-card;
+    transform: translateY(-4px);
   }
 
   .career-card {
