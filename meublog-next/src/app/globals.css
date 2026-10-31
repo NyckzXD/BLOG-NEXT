@@ -7,10 +7,28 @@
     @apply box-border m-0 p-0;
   }
 
+  :root {
+    /* Altura da navbar fixa (64px) mais 8px de respiro. É a única definição
+       desse número no projeto: o `scroll-margin-top` abaixo lê daqui, e o
+       SmoothScroll e a navbar leem pelo helper `navOffset()`. */
+    --nav-offset: 72px;
+  }
+
   html {
     /* O scroll suave fica por conta do Lenis (ver SmoothScroll). Manter
        scroll-behavior: smooth aqui faria os dois brigarem nas âncoras. */
     overflow-x: hidden;
+  }
+
+  /* O offset da navbar precisa existir fora do caminho do Lenis também.
+     O SmoothScroll calcula a posição final de cada âncora subtraindo
+     --nav-offset, mas ele sai antes disso quando o usuário pede menos
+     movimento — e nem existe antes da hidratação. Nesses dois casos o
+     navegador faz a navegação de fragmento sozinho, e a seção parava atrás
+     da navbar. `scroll-margin-top` resolve nos dois caminhos. */
+  section[id],
+  main[id] {
+    scroll-margin-top: var(--nav-offset);
   }
 
   /* Recomendado pelo Lenis */
@@ -70,7 +88,7 @@
      as utilities de translate do Tailwind montam o transform a partir de
      custom properties e não interpolam de forma confiável. */
   .skip-link {
-    @apply fixed left-4 top-4 z-[200] inline-flex min-h-11 items-center rounded-lg border border-accent2/40 bg-bg2 px-4 font-mono text-[0.82rem] text-text-main transition-transform duration-150 motion-reduce:transition-none;
+    @apply fixed left-4 top-4 z-[200] inline-flex min-h-11 items-center rounded-lg border border-accent2/40 bg-bg2 px-4 font-mono text-sm text-text-main transition-transform duration-150 motion-reduce:transition-none;
     transform: translateY(-200%);
   }
   /* `:focus`, não `:focus-visible`: o link só é alcançável por teclado, e
@@ -84,20 +102,11 @@
     background-image: linear-gradient(135deg, theme('colors.accent'), theme('colors.accent2'));
   }
 
-  .btn-primary {
-    @apply inline-flex items-center gap-2 rounded-xl px-7 py-3 text-sm font-bold text-black shadow-glow transition-all duration-200;
-    background-image: linear-gradient(135deg, theme('colors.accent'), theme('colors.accent2'));
-  }
-  .btn-primary:hover {
-    @apply -translate-y-0.5 opacity-90 shadow-glow-lg;
-  }
-
-  .btn-ghost {
-    @apply inline-flex items-center gap-2 rounded-xl border border-border bg-bg3 px-6 py-3 text-sm font-medium text-text-main transition-all duration-200;
-  }
-  .btn-ghost:hover {
-    @apply -translate-y-0.5 border-accent2/40;
-  }
+  /* `.btn-primary` e `.btn-ghost` saíram daqui: o projeto tem um sistema de
+     botão só, o OriginButton. O primeiro era código morto; o segundo tinha um
+     único uso, o "Ver todos no GitHub", que agora é OriginButton como os
+     outros CTAs. Os dois também carregavam o `-translate-y-0.5` que nunca
+     renderizava (§2.2b). */
 
   .glass-panel {
     @apply border border-border bg-bg2/70 backdrop-blur-xl;
@@ -141,11 +150,11 @@
     @apply translate-x-1 shadow-card;
   }
 
-  .c-keyword { color: #e4e4e7; }
-  .c-var     { color: #93c5fd; }
-  .c-prop    { color: #f472b6; }
-  .c-str     { color: #86efac; }
-  .c-bool    { color: #fcd34d; }
+  .c-keyword { color: theme('colors.syntax.keyword'); }
+  .c-var     { color: theme('colors.syntax.var'); }
+  .c-prop    { color: theme('colors.syntax.prop'); }
+  .c-str     { color: theme('colors.syntax.str'); }
+  .c-bool    { color: theme('colors.syntax.bool'); }
 
   .code-cursor {
     display: inline-block;

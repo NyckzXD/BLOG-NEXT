@@ -163,21 +163,28 @@ export default function HeroSection() {
 
   return (
     <FloatingPathsBackground position={-1} className="min-h-screen">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center gap-14 px-[5%] pb-20 pt-32 lg:flex-row">
+      {/* `container` no lugar de `mx-auto w-full max-w-6xl px-[5%]`.
+          O `max-w-6xl` não deixava o hero mais largo: o `px-[5%]` ficava
+          *dentro* dele, enquanto nas outras seções ficava fora do
+          `max-w-5xl`. Resultado medido em 2560px: conteúdo do hero com
+          896,8px contra 1024px das seções, e a margem esquerda 63,6px
+          adiante. O degrau crescia com a viewport, porque o percentual
+          crescia e os max-w não. */}
+      <section className="container flex min-h-screen flex-col items-center justify-center gap-14 pb-20 pt-32 lg:flex-row">
         {/* Left: content */}
         <div className="min-w-0 flex-1">
-          <h1 className="mb-4 text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold leading-[1.12] tracking-tight text-white">
+          <h1 className="mb-4 text-display font-extrabold tracking-tight text-white">
             Oi, eu sou
             <br />
             <span className="accent-text">Nycolas Fernandes</span>
           </h1>
 
-          <p className="mb-5 font-mono text-[0.88rem] text-muted">
+          <p className="mb-5 font-mono text-sm text-muted">
             Desenvolvedor Júnior <span className="mx-1 opacity-40">·</span>{" "}
             Estudante de SI <span className="mx-1 opacity-40">·</span> 20 anos
           </p>
 
-          <p className="mb-9 max-w-[480px] text-[1.05rem] text-[#cacaca]">
+          <p className="mb-9 max-w-[480px] text-lg text-text-soft">
             Apaixonado por resolver problemas com código. Atualmente estudando
             na <strong>Faculdade Anhanguera</strong>.
           </p>
@@ -215,12 +222,12 @@ export default function HeroSection() {
               <span className="inline-block h-3 w-3 rounded-full bg-red" />
               <span className="inline-block h-3 w-3 rounded-full bg-yellow" />
               <span className="inline-block h-3 w-3 rounded-full bg-green" />
-              <span className="ml-2 font-mono text-[0.78rem] text-muted">
+              <span className="ml-2 font-mono text-xs text-muted">
                 nycolas.js
               </span>
             </div>
 
-            <pre className="overflow-x-auto whitespace-pre px-6 py-5 font-mono text-[0.88rem] leading-[1.9]">
+            <pre className="overflow-x-auto whitespace-pre px-6 py-5 font-mono text-sm leading-[1.9]">
               <code ref={codeRef} />
             </pre>
           </div>

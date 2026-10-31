@@ -28,7 +28,7 @@ export function SectionHeading({
       </h2>
       <div className="mt-3 h-[3px] w-10 rounded-full bg-gradient-to-r from-accent to-accent2" />
       {description && (
-        <p className="mt-4 max-w-xl text-[15px] text-muted">{description}</p>
+        <p className="mt-4 max-w-xl text-base text-muted">{description}</p>
       )}
     </Reveal>
   );

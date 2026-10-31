@@ -5,18 +5,24 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-// Maps the component's own --ic-* palette onto the token names its Tailwind
-// classes read (--color-*). Kept separate from the palette values so a given
-// button instance can pick "light" or "dark" explicitly, instead of relying
-// on a `dark` class ancestor that the rest of this site doesn't use.
-const colorMapClassName =
-  "[--color-background:var(--ic-background)] [--color-foreground:var(--ic-foreground)] [--color-primary:var(--ic-primary)] [--color-secondary:var(--ic-secondary)] [--color-border:var(--ic-border)] [--color-card:var(--ic-card)] [--color-card-foreground:var(--ic-card-foreground)] [--color-muted:var(--ic-muted)] [--color-muted-foreground:var(--ic-muted-foreground)] [--color-accent:var(--ic-accent)] [--color-accent-foreground:var(--ic-accent-foreground)] [--color-input:var(--ic-input)] [--color-ring:var(--ic-ring)] [--color-destructive:var(--ic-destructive)] [--color-paper:var(--ic-paper)] [--color-popover-foreground:var(--ic-popover-foreground)] [--color-brand:var(--ic-brand)] [--color-brand-soft:var(--ic-brand-soft)] [--color-chart-1:var(--ic-chart-1)] [--color-chart-2:var(--ic-chart-2)] [--color-chart-3:var(--ic-chart-3)] [--color-chart-4:var(--ic-chart-4)] [--color-chart-5:var(--ic-chart-5)]";
+/**
+ * O botão trazia uma paleta inteira própria: ~46 variáveis `--ic-*`, uma
+ * segunda camada mapeando cada uma para um `--color-*`, e valores que não
+ * eram os do site — `#f6f3ec` (creme quente) sobre `#111111`, enquanto a
+ * página é `#f5f5f5` neutro sobre `#000000`. Os CTAs principais puxavam para
+ * o quente num site frio.
+ *
+ * Das 46, o componente usava sete. As outras — `--ic-chart-1..5`,
+ * `--ic-destructive`, `--ic-brand`, `--ic-paper`, `--ic-popover-foreground` e
+ * companhia — vinham do kit de origem e nada no projeto lia. O
+ * `--ic-ring` ficou órfão quando o anel de foco saiu no item 1.
+ *
+ * Agora são duas listas curtas de classes com os tokens do próprio site, sem
+ * camada de variável no meio: não havia reuso que justificasse a indireção.
+ */
+const lightThemeClassName = "bg-accent2 text-bg border-accent";
 
-const lightThemeClassName =
-  "[--ic-background:#ffffff] [--ic-foreground:#111111] [--ic-primary:#111111] [--ic-secondary:#646b75] [--ic-surface-border:#e9edf2] [--ic-border:#e3e7ec] [--ic-card:#ffffff] [--ic-card-foreground:#111111] [--ic-muted:#f5f7fa] [--ic-muted-foreground:#6d7480] [--ic-accent:#f3f5f8] [--ic-accent-foreground:#111111] [--ic-input:#e3e7ec] [--ic-ring:rgba(17,17,17,0.16)] [--ic-destructive:#dc2626] [--ic-paper:#fcfcfd] [--ic-popover-foreground:#111111] [--ic-brand:#0ea5e9] [--ic-brand-soft:#bae6fd] [--ic-shadow-soft:0_18px_38px_-24px_rgba(15,23,42,0.35)] [--ic-chart-1:oklch(0.52_0.19_254)] [--ic-chart-2:oklch(0.74_0.11_232)] [--ic-chart-3:oklch(0.42_0.16_262)] [--ic-chart-4:oklch(0.84_0.07_228)] [--ic-chart-5:oklch(0.62_0.14_240)]";
-
-const darkThemeClassName =
-  "[--ic-background:#111111] [--ic-foreground:#f6f3ec] [--ic-primary:#f6f3ec] [--ic-secondary:#cbc6bb] [--ic-surface-border:#2a2a25] [--ic-border:#2b2a25] [--ic-card:#111111] [--ic-card-foreground:#f6f3ec] [--ic-muted:#171716] [--ic-muted-foreground:#9a958a] [--ic-accent:#1a1a18] [--ic-accent-foreground:#f6f3ec] [--ic-input:#2b2a25] [--ic-ring:rgba(246,243,236,0.18)] [--ic-destructive:#f87171] [--ic-paper:#171716] [--ic-popover-foreground:#f6f3ec] [--ic-brand:#38bdf8] [--ic-brand-soft:#0c4a6e] [--ic-shadow-soft:0_20px_44px_-28px_rgba(0,0,0,0.6)] [--ic-chart-1:oklch(0.68_0.17_250)] [--ic-chart-2:oklch(0.82_0.09_225)] [--ic-chart-3:oklch(0.58_0.15_260)] [--ic-chart-4:oklch(0.75_0.12_235)] [--ic-chart-5:oklch(0.88_0.06_220)]";
+const darkThemeClassName = "bg-bg3 text-text-main border-border";
 
 // The fill is animated with a CSS transition rather than Framer Motion: Framer
 // writes its own inline `transform`, which silently overrode the Tailwind
@@ -223,13 +229,9 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
         aria-busy={loading || undefined}
         aria-disabled={href && isDisabled ? true : undefined}
         className={cn(
-          colorMapClassName,
+          "relative inline-flex h-12 cursor-pointer touch-manipulation select-none items-center justify-center overflow-hidden rounded-xl px-8 font-medium text-base tracking-[-0.02em]",
+          "border-[0.5px]",
           isLight ? lightThemeClassName : darkThemeClassName,
-          "relative inline-flex h-12 cursor-pointer touch-manipulation select-none items-center justify-center overflow-hidden rounded-xl px-8 font-medium text-[15px] tracking-[-0.02em]",
-          "border-[0.5px] border-[var(--color-border)]",
-          isLight
-            ? "bg-[var(--color-card)] text-[var(--color-card-foreground)]"
-            : "bg-[var(--color-muted)] text-[var(--color-foreground)]",
           // Kept in sync with FILL_DURATION/FILL_EASE so the text color and the
           // circular fill finish transitioning together instead of the text
           // flipping color before the fill has visually caught up.
@@ -243,8 +245,10 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
           // --color-background (#111111), que não é o fundo real da página.
           "disabled:pointer-events-none disabled:opacity-50",
           href && isDisabled && "pointer-events-none opacity-50",
-          showFill &&
-            (isLight ? "text-[var(--color-background)]" : "text-neutral-950"),
+          // A cor do texto enquanto o preenchimento cobre o botão. Antes o
+          // lado escuro usava `text-neutral-950`, um valor do Tailwind
+          // padrão que não existe na paleta do site.
+          showFill && (isLight ? "text-accent2" : "text-bg"),
           className
         )}
         data-pressed={isPressed ? "true" : "false"}
@@ -333,7 +337,8 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
           aria-hidden
           className={cn(
             "pointer-events-none absolute rounded-full",
-            isLight ? "bg-[var(--color-foreground)]" : "bg-neutral-50"
+            // Mesma história do `bg-neutral-50` que estava aqui.
+            isLight ? "bg-bg" : "bg-accent2"
           )}
           style={{
             height: coverSize,

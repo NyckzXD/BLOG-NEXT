@@ -21,9 +21,9 @@ export default function AboutSection() {
     <section
       id="sobre"
       aria-labelledby="sobre-titulo"
-      className="px-[5%] py-24"
+      className="py-24"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="container">
         <SectionHeading
           eyebrow="// 01. Sobre"
           title="Sobre mim"
@@ -35,7 +35,7 @@ export default function AboutSection() {
           <Reveal delay={0.1}>
             <div className="flex flex-col gap-4">
               {PARAGRAPHS.map((text, i) => (
-                <p key={i} className="text-[#cacaca]">{text}</p>
+                <p key={i} className="text-text-soft">{text}</p>
               ))}
             </div>
           </Reveal>
