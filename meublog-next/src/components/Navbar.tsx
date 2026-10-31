@@ -17,8 +17,15 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
+    // Com o Lenis o evento de scroll chega a cada frame. Sem essa guarda era
+    // um setState por frame durante toda a animação das âncoras.
+    let current: boolean | null = null;
+
     function onScroll() {
-      setScrolled(window.scrollY > 8);
+      const next = window.scrollY > 8;
+      if (next === current) return;
+      current = next;
+      setScrolled(next);
     }
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

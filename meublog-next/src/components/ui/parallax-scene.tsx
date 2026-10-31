@@ -67,6 +67,10 @@ export function ParallaxScene({ className }: { className?: string }) {
     <section
       ref={rootRef}
       aria-label="Transição visual"
+      /* Peso do trecho preso para o scroll das âncoras: 1px de scroll aqui
+         muda bem menos a tela do que 1px numa seção normal. Ver sceneSegments
+         em smooth-scroll. */
+      data-sticky-scene="0.2"
       /* sem animação (motion-reduce) a cena vira uma seção normal de 100vh */
       /* svh em vez de vh: no mobile o vh acompanha a barra de endereço e a
          cena era redimensionada no meio do scroll. O svh é estável. */
