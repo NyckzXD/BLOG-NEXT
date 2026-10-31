@@ -87,6 +87,17 @@ export default function HeroSection() {
     const el = codeRef.current;
     if (!el) return;
 
+    /**
+     * Quem pediu menos movimento recebe o bloco pronto, sem digitação e sem
+     * cursor piscando. Era a única animação do site que ficava rodando para
+     * sempre — reescrevendo o innerHTML a cada ~40ms e recomeçando a cada 5s
+     * — e a que mais pesava na thread principal.
+     */
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.innerHTML = CODE_LINES.map((line) => line.html).join("\n");
+      return;
+    }
+
     let lineIdx = 0;
     let charIdx = 0;
     const done: string[] = [];

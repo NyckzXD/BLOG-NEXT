@@ -23,7 +23,7 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1, 2, 3 e 4** da tabela de prioridade foram aplicados em 31/10/2026
+Os itens **1, 2, 3, 4 e 5** da tabela de prioridade foram aplicados em 31/10/2026
 e verificados no navegador (`npx next build` passa; medições abaixo em cada
 seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
 componente. Os demais seguem em aberto.
@@ -63,21 +63,45 @@ outlineOffset: 3px
 boxShadow: none                          // o ring quebrado não existe mais
 ```
 
-### 1.2 `prefers-reduced-motion` cobre as animações grandes, mas não as pequenas
+### 1.2 ✅ CORRIGIDO — `prefers-reduced-motion` não cobria as animações pequenas
 
-Tratado corretamente em `smooth-scroll.tsx:189`, `parallax-scene.tsx:39` e
-`floating-paths.tsx` (via `useReducedMotion`). **Não** tratado em:
+Já estava tratado em `smooth-scroll.tsx:189`, `parallax-scene.tsx:39` e
+`floating-paths.tsx`. Faltava em `ui/reveal.tsx`, no typewriter do
+`HeroSection` e no `.code-cursor`. O `animate-pulse` do `SkeletonCard` saiu
+sozinho quando a seção virou Server Component (§3.2).
 
-- `ui/reveal.tsx` — usado em todas as seções; sempre anima `opacity` + `y`.
-- O typewriter de `HeroSection.tsx:114` — reescreve `innerHTML` a cada ~40ms
-  **em loop infinito** (reinicia a cada 5s), sem nenhuma checagem.
-- `.code-cursor` (`globals.css`) — `blink` infinito.
-- ~~`animate-pulse` do `SkeletonCard`~~ — resolvido por tabela: o skeleton
-  deixou de existir quando a seção virou Server Component (§3.2).
+**Aplicado:**
 
-Regras: `reduced-motion` (severidade **High**), `excessive-motion` ("animar 1–2
-elementos por view no máximo"; o hero anima 36 paths SVG + o typewriter + o
-cursor simultaneamente).
+- `ui/reveal.tsx` — `useReducedMotion()` (mesmo idioma do `floating-paths`),
+  com `initial={false}` e sem `whileInView`. **Esse é o detalhe que importa:**
+  o `opacity: 0` do `initial` é escrito no HTML servido, então um guard mal
+  feito aqui deixaria o conteúdo de todas as seções invisível em vez de
+  apenas parado.
+- `HeroSection` — a digitação é pulada e o bloco é pintado pronto
+  (`CODE_LINES.map(l => l.html)`). Era a única animação do site que rodava
+  para sempre.
+- `globals.css` — `@media (prefers-reduced-motion: reduce)` zera o `blink`.
+  Na prática o cursor nem chega a ser renderizado nesse caminho; a regra fica
+  porque a classe é global.
+
+Verificado forçando o ramo reduzido no navegador (o painel não emula essa
+media feature, então a condição foi forçada no código via HMR e revertida
+depois — confirmei que não sobrou marca de teste):
+
+```
+blocoEstavel: true            // o código não muda em 1,5s: sem loop de digitação
+temCursor: false
+textoCompleto: true           // "café" e "};" presentes, bloco inteiro
+elementosComOpacidadeBaixa: 0 // nada preso em opacity 0 em #sobre/#projetos/#carreira
+```
+
+E com movimento normal, depois de reverter: `voltouADigitar: true`,
+`temCursor: true`.
+
+Segue em aberto o outro lado da regra `excessive-motion`: com movimento
+normal o hero ainda anima 36 paths SVG + typewriter + cursor ao mesmo tempo.
+Isso é o §3.4, que o item 5 **não** resolve — ele só tira o custo de quem
+pediu menos movimento.
 
 ### 1.3 Falta skip link — `skip-links`
 
@@ -275,6 +299,11 @@ e as cores de sintaxe (`.c-keyword`, `.c-var`, …) em `globals.css`.
   `dark:` ou de troca de classe no projeto. O site é dark-only.
 - `theme.container` (linhas 10-16: center, padding 1.25rem, 1200px) — **zero**
   usos de `className="container"`. Todas as seções usam `px-[5%]` + `max-w-*`.
+- As keyframes `fade-up` e `pulse2` e suas animações
+  (`tailwind.config.js:50-72`) — **zero** usos de `animate-fade-up` /
+  `animate-pulse2` no projeto. Só `blink` é usada, e por CSS direto no
+  `.code-cursor`, não pela classe `animate-blink`. Encontrado ao varrer as
+  animações para o item 5.
 
 ---
 
@@ -399,7 +428,7 @@ funciona nos dois caminhos.
 | 2 | Alvos de toque ≥44px (§2.1) | `Footer.tsx`, `HeroSection.tsx:192`, `Navbar.tsx:53,62,92,100` | baixo | ✅ feito |
 | 3 | `next/font` e remover o `@import` duplicado (§3.1) | `layout.tsx`, `globals.css:1`, `tailwind.config.js` | baixo | ✅ feito |
 | 4 | Repos via Server Component com `revalidate` (§3.2) | `ProjectsSection.tsx` | médio | ✅ feito |
-| 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx` | baixo | — |
+| 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx`, `globals.css` | baixo | ✅ feito |
 | 6 | Card de projeto clicável inteiro (§2.2) | `ProjectsSection.tsx:74` | baixo | — |
 | 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx` | baixo | — |
 | 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | todas as seções | baixo | — |

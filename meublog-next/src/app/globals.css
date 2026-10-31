@@ -125,4 +125,12 @@
     vertical-align: text-bottom;
     animation: blink 0.9s step-end infinite;
   }
+
+  /* Com menos movimento o HeroSection nem chega a renderizar o cursor (pinta
+     o bloco pronto), mas a classe é global: se voltar a aparecer, não pisca. */
+  @media (prefers-reduced-motion: reduce) {
+    .code-cursor {
+      animation: none;
+    }
+  }
 }
