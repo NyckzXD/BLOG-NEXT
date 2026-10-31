@@ -163,7 +163,14 @@ export default function HeroSection() {
 
   return (
     <FloatingPathsBackground position={-1} className="min-h-screen">
-      <section className="mx-auto flex min-h-screen w-full max-w-6xl flex-col items-center justify-center gap-14 px-[5%] pb-20 pt-32 lg:flex-row">
+      {/* `container` no lugar de `mx-auto w-full max-w-6xl px-[5%]`.
+          O `max-w-6xl` não deixava o hero mais largo: o `px-[5%]` ficava
+          *dentro* dele, enquanto nas outras seções ficava fora do
+          `max-w-5xl`. Resultado medido em 2560px: conteúdo do hero com
+          896,8px contra 1024px das seções, e a margem esquerda 63,6px
+          adiante. O degrau crescia com a viewport, porque o percentual
+          crescia e os max-w não. */}
+      <section className="container flex min-h-screen flex-col items-center justify-center gap-14 pb-20 pt-32 lg:flex-row">
         {/* Left: content */}
         <div className="min-w-0 flex-1">
           <h1 className="mb-4 text-[clamp(2.2rem,5vw,3.8rem)] font-extrabold leading-[1.12] tracking-tight text-white">

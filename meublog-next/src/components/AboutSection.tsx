@@ -21,9 +21,9 @@ export default function AboutSection() {
     <section
       id="sobre"
       aria-labelledby="sobre-titulo"
-      className="px-[5%] py-24"
+      className="py-24"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="container">
         <SectionHeading
           eyebrow="// 01. Sobre"
           title="Sobre mim"

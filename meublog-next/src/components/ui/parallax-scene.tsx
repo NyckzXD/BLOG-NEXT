@@ -114,7 +114,7 @@ export function ParallaxScene({ className }: { className?: string }) {
           {/* 3 — título */}
           <div
             data-parallax-layer="3"
-            className="absolute inset-0 flex flex-col items-center justify-center px-[5%] text-center will-change-transform"
+            className="absolute inset-0 flex flex-col items-center justify-center px-5 text-center will-change-transform"
           >
             <p className="eyebrow mb-4">// em construção</p>
             <h2 className="max-w-3xl text-[clamp(2rem,6vw,4.2rem)] font-extrabold leading-[1.08] tracking-tight text-white">

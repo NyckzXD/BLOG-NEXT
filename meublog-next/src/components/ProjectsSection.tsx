@@ -65,9 +65,9 @@ export default async function ProjectsSection() {
     <section
       id="projetos"
       aria-labelledby="projetos-titulo"
-      className="border-y border-border bg-bg2 px-[5%] py-24"
+      className="border-y border-border bg-bg2 py-24"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="container">
         <SectionHeading
           eyebrow="// 02. Projetos"
           title="Projetos no GitHub"

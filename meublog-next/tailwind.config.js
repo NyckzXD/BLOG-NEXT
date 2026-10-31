@@ -7,11 +7,21 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
+    // Uma única definição de "largura do conteúdo" para o site inteiro.
+    // Antes isto estava configurado e nunca usado: cada seção repetia
+    // `px-[5%]` + `mx-auto max-w-5xl` por conta própria, e o hero usava
+    // `max-w-6xl`, o que desalinhava a margem dele com a das outras seções.
+    //
+    // O teto é 1024px (o `max-w-5xl` que três das quatro seções já usavam) em
+    // vez dos 1200px que estavam aqui, para que a troca alinhe o hero com as
+    // demais em vez de alargar a página toda. O gutter de 1.25rem fica perto
+    // dos ~18,75px que o `px-[5%]` dava em 375px, mas é um valor fixo da
+    // grade de 4px — percentual crescia sem limite junto com a viewport.
     container: {
       center: true,
       padding: "1.25rem",
       screens: {
-        "2xl": "1200px",
+        lg: "1024px",
       },
     },
     extend: {

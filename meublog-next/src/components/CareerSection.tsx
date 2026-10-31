@@ -25,9 +25,9 @@ export default function CareerSection() {
     <section
       id="carreira"
       aria-labelledby="carreira-titulo"
-      className="px-[5%] py-24"
+      className="py-24"
     >
-      <div className="mx-auto max-w-5xl">
+      <div className="container">
         <SectionHeading
           eyebrow="// 03. Carreira"
           title="Carreira profissional"

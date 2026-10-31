@@ -23,7 +23,7 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1 a 7** da tabela de prioridade foram aplicados em 31/10/2026
+Os itens **1 a 8** da tabela de prioridade foram aplicados em 31/10/2026
 e verificados no navegador (`npx next build` passa; medições abaixo em cada
 seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
 componente. Os demais seguem em aberto.
@@ -401,8 +401,10 @@ e as cores de sintaxe (`.c-keyword`, `.c-var`, …) em `globals.css`.
 
 - `darkMode: ["class"]` (`tailwind.config.js:3`) — **zero** ocorrências de
   `dark:` ou de troca de classe no projeto. O site é dark-only.
-- `theme.container` (linhas 10-16: center, padding 1.25rem, 1200px) — **zero**
-  usos de `className="container"`. Todas as seções usam `px-[5%]` + `max-w-*`.
+- ~~`theme.container` (linhas 10-16: center, padding 1.25rem, 1200px) —
+  **zero** usos de `className="container"`. Todas as seções usam `px-[5%]` +
+  `max-w-*`.~~ ✅ resolvido pelo item 8 (§5.2): agora é a única definição de
+  largura de conteúdo do site, com o teto ajustado para 1024px.
 - As keyframes `fade-up` e `pulse2` e suas animações
   (`tailwind.config.js:50-72`) — **zero** usos de `animate-fade-up` /
   `animate-pulse2` no projeto. Só `blink` é usada, e por CSS direto no
@@ -413,20 +415,64 @@ e as cores de sintaxe (`.c-keyword`, `.c-var`, …) em `globals.css`.
 
 ## 5. Layout e Responsivo (ALTO)
 
-### 5.1 O hero é mais largo que todas as outras seções — `container-width`
+### 5.1 ✅ CORRIGIDO — O hero não alinha com as outras seções — `container-width`
 
-- `HeroSection.tsx:155` → `max-w-6xl` (1152px)
-- `AboutSection.tsx:22`, `ProjectsSection.tsx:55`, `CareerSection.tsx:26` → `max-w-5xl` (1024px)
+- `HeroSection.tsx` → `max-w-6xl` (1152px)
+- `AboutSection.tsx`, `ProjectsSection.tsx`, `CareerSection.tsx` → `max-w-5xl` (1024px)
 
-Em telas ≥1152px a margem esquerda do hero não alinha com a das seções
-seguintes — um degrau de 64px por lado, visível ao rolar.
+**Correção do diagnóstico original.** Esta seção dizia "o hero é mais largo" e
+"um degrau de 64px por lado". Ao medir, os dois pontos saíram diferentes:
 
-### 5.2 Gutter percentual em vez da escala de espaçamento — `spacing-scale`
+O hero não era mais largo — era **mais estreito**. O `px-[5%]` ficava *dentro*
+do `max-w-6xl` dele, enquanto nas outras seções o mesmo `px-[5%]` ficava *fora*
+do `max-w-5xl`. Então o padding comia a largura do hero e não a das seções.
+
+E o degrau não era fixo: crescia com a viewport, porque o percentual crescia
+enquanto os `max-w` não. Reproduzindo as duas regras antigas no navegador:
+
+| Viewport | Conteúdo do hero | Conteúdo das seções | Degrau na margem esquerda |
+|---|---|---|---|
+| 1432px | 1008,8px | 1024px | 7,6px |
+| 2560px | 896,8px | 1024px | 63,6px |
+
+Ou seja: o número 64px valia só perto de 2560px; em 1440px o desalinhamento
+era de 7,6px. A conclusão de que havia desalinhamento estava certa, o tamanho
+dele não.
+
+**Aplicado:** as quatro seções, a navbar e o footer passaram a usar o mesmo
+`container`. Medido em 1440px, todas as bordas esquerdas do conteúdo caem em
+**224px** — logo da navbar, `h1` do hero, os três `h2` de seção e o texto do
+footer — e a borda direita do footer fecha em 1208px, igual à do container.
+
+### 5.2 ✅ CORRIGIDO — Gutter percentual em vez da escala de espaçamento — `spacing-scale`
 
 `px-[5%]` em 7 arquivos. Percentual significa gutter que cresce indefinidamente
-com a viewport (5% de 2560px = 128px) e encolhe no mobile (18px em 375px), sem
-relação com a grade de 4/8px. É o papel do `theme.container`, que está
+com a viewport (5% de 2560px = 128px) e encolhe no mobile (18,75px em 375px),
+sem relação com a grade de 4/8px. É o papel do `theme.container`, que estava
 configurado e ignorado (§4.4).
+
+**Aplicado:** `theme.container` virou a única definição de largura de conteúdo
+do site — `center`, `padding: 1.25rem`, teto em `lg: 1024px`. Os sete
+`px-[5%]` saíram:
+
+- `HeroSection`, `AboutSection`, `ProjectsSection`, `CareerSection`, `Navbar` e
+  `Footer` → `container`.
+- O painel do menu mobile (`Navbar`) e a camada de título da `ParallaxScene` →
+  `px-5`. As duas sangram de ponta a ponta de propósito, e `px-5` é exatamente
+  o mesmo `1.25rem` do gutter do container.
+
+O teto ficou em **1024px**, não nos 1200px que estavam na config: assim a troca
+alinha o hero com as seções em vez de alargar a página inteira. O conteúdo
+passa de 1024px para 984px no desktop (o container inclui o padding, com
+`box-sizing: border-box`), e o gutter mobile de 18,75px para 20px — um valor
+fixo da grade de 4px.
+
+Nas seções com fundo próprio (`ProjectsSection` tem `border-y` e `bg-bg2`) e
+nas barras (navbar, footer), o `container` foi para um `div` interno: o fundo
+e as bordas continuam sangrando, só o conteúdo é que fica contido.
+
+Em 375px: gutter de 20px dos dois lados, conteúdo de 335px e
+`scrollWidth === innerWidth === 375` — sem scroll horizontal.
 
 ### 5.3 Sem escala tipográfica — `font-scale`
 
@@ -535,7 +581,7 @@ funciona nos dois caminhos.
 | 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx`, `globals.css` | baixo | ✅ feito |
 | 6 | Card de projeto clicável inteiro (§2.2, §2.2b) | `ProjectsSection.tsx`, `globals.css` | baixo | ✅ feito |
 | 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx`, `page.tsx`, `ui/section-heading.tsx`, `ui/smooth-scroll.tsx`, `globals.css` | baixo | ✅ feito |
-| 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | todas as seções | baixo | — |
+| 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | `tailwind.config.js`, todas as seções, `Navbar.tsx`, `Footer.tsx`, `ui/parallax-scene.tsx` | baixo | ✅ feito |
 | 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js` | médio | — |
 | 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css` | médio | — |
 | 11 | Estado vazio + recuperação nos projetos (§7.1, §7.2) | `ProjectsSection.tsx` | baixo | ✅ saiu junto com o 4 |
