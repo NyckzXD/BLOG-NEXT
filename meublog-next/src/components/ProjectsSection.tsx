@@ -1,6 +1,3 @@
-"use client";
-
-import { useEffect, useState } from "react";
 import { BookOpen, Star, GitFork, ArrowRight, ArrowUpRight } from "lucide-react";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
@@ -15,40 +12,54 @@ interface Repo {
   language: string | null;
 }
 
-function SkeletonCard() {
+const GITHUB_USER = "NyckzXD";
+const PROFILE_URL = `https://github.com/${GITHUB_USER}`;
+
+/**
+ * Busca no servidor, com cache de uma hora.
+ *
+ * Antes isso rodava no cliente, dentro de um useEffect: cada visita gastava
+ * uma das 60 requisições/hora que a API pública do GitHub concede por IP — e
+ * quem estivesse atrás de um IP compartilhado via a seção falhar. Agora é uma
+ * requisição por hora para o site inteiro e o HTML já sai com os
+ * repositórios dentro, o que também acaba com a mudança de altura da página
+ * depois do carregamento.
+ *
+ * O User-Agent não é opcional: fora do navegador a API do GitHub responde 403
+ * sem ele.
+ */
+async function getRepos(): Promise<Repo[] | null> {
+  try {
+    const res = await fetch(
+      `https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=6`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          "User-Agent": `${GITHUB_USER}-portfolio`,
+        },
+        next: { revalidate: 3600 },
+      }
+    );
+    if (!res.ok) return null;
+    return (await res.json()) as Repo[];
+  } catch {
+    return null;
+  }
+}
+
+/** Erro e lista vazia dividem a mesma caixa; só muda o texto. */
+function Aviso({ children }: { children: React.ReactNode }) {
   return (
-    <div className="repo-card animate-pulse">
-      <div className="h-4 w-2/3 rounded bg-bg3" />
-      <div className="h-3 w-full rounded bg-bg3" />
-      <div className="h-3 w-4/5 rounded bg-bg3" />
-      <div className="mt-1 flex gap-3">
-        <div className="h-3 w-10 rounded bg-bg3" />
-        <div className="h-3 w-10 rounded bg-bg3" />
-      </div>
-    </div>
+    <Reveal className="mb-8">
+      <p className="rounded-xl border border-border bg-bg p-10 text-center text-muted">
+        {children}
+      </p>
+    </Reveal>
   );
 }
 
-export default function ProjectsSection() {
-  const [repos, setRepos] = useState<Repo[]>([]);
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetch("https://api.github.com/users/NyckzXD/repos?sort=updated&per_page=6")
-      .then((r) => {
-        if (!r.ok) throw new Error();
-        return r.json() as Promise<Repo[]>;
-      })
-      .then((data) => {
-        setRepos(data);
-        setLoading(false);
-      })
-      .catch(() => {
-        setError(true);
-        setLoading(false);
-      });
-  }, []);
+export default async function ProjectsSection() {
+  const repos = await getRepos();
 
   return (
     <section id="projetos" className="border-y border-border bg-bg2 px-[5%] py-24">
@@ -59,56 +70,65 @@ export default function ProjectsSection() {
           description="Repositórios públicos mais recentes, atualizados automaticamente."
         />
 
-        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {loading &&
-            Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)}
-
-          {error && (
-            <p className="col-span-full py-10 text-center text-muted">
-              Erro ao carregar repositórios.
-            </p>
-          )}
-
-          {repos.map((repo, i) => (
-            <Reveal key={repo.id} delay={(i % 3) * 0.08}>
-              <div className="repo-card h-full">
-                <div className="flex items-center gap-2 text-[0.95rem] font-semibold text-accent2">
-                  <BookOpen size={15} className="text-muted" />
-                  <a
-                    href={repo.html_url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="truncate hover:underline"
-                  >
-                    {repo.name}
-                  </a>
-                  <ArrowUpRight size={13} className="ml-auto flex-none text-muted" />
-                </div>
-                <p className="flex-1 text-[0.85rem] leading-relaxed text-muted">
-                  {repo.description || "Sem descrição"}
-                </p>
-                <div className="flex gap-4 font-mono text-[0.8rem] text-muted">
-                  <span className="flex items-center gap-1.5">
-                    <Star size={13} /> {repo.stargazers_count}
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <GitFork size={13} /> {repo.forks_count}
-                  </span>
-                  {repo.language && (
+        {repos === null ? (
+          <Aviso>
+            Não foi possível carregar os repositórios agora. Eles continuam
+            acessíveis{" "}
+            <a
+              href={PROFILE_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="text-accent2 underline underline-offset-4"
+            >
+              direto no GitHub
+            </a>
+            .
+          </Aviso>
+        ) : repos.length === 0 ? (
+          <Aviso>Ainda não há repositórios públicos para mostrar aqui.</Aviso>
+        ) : (
+          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {repos.map((repo, i) => (
+              <Reveal key={repo.id} delay={(i % 3) * 0.08}>
+                <div className="repo-card h-full">
+                  <div className="flex items-center gap-2 text-[0.95rem] font-semibold text-accent2">
+                    <BookOpen size={15} className="text-muted" />
+                    <a
+                      href={repo.html_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="truncate hover:underline"
+                    >
+                      {repo.name}
+                    </a>
+                    <ArrowUpRight size={13} className="ml-auto flex-none text-muted" />
+                  </div>
+                  <p className="flex-1 text-[0.85rem] leading-relaxed text-muted">
+                    {repo.description || "Sem descrição"}
+                  </p>
+                  <div className="flex gap-4 font-mono text-[0.8rem] text-muted">
                     <span className="flex items-center gap-1.5">
-                      <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                      {repo.language}
+                      <Star size={13} /> {repo.stargazers_count}
                     </span>
-                  )}
+                    <span className="flex items-center gap-1.5">
+                      <GitFork size={13} /> {repo.forks_count}
+                    </span>
+                    {repo.language && (
+                      <span className="flex items-center gap-1.5">
+                        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+                        {repo.language}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+              </Reveal>
+            ))}
+          </div>
+        )}
 
         <div className="text-center">
           <a
-            href="https://github.com/NyckzXD"
+            href={PROFILE_URL}
             target="_blank"
             rel="noreferrer"
             className="btn-ghost"

@@ -23,9 +23,10 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1, 2 e 3** da tabela de prioridade foram aplicados em 31/10/2026 e
-verificados no navegador (`npx next build` passa; medições abaixo em cada
-seção). Os demais seguem em aberto.
+Os itens **1, 2, 3 e 4** da tabela de prioridade foram aplicados em 31/10/2026
+e verificados no navegador (`npx next build` passa; medições abaixo em cada
+seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
+componente. Os demais seguem em aberto.
 
 ---
 
@@ -71,7 +72,8 @@ Tratado corretamente em `smooth-scroll.tsx:189`, `parallax-scene.tsx:39` e
 - O typewriter de `HeroSection.tsx:114` — reescreve `innerHTML` a cada ~40ms
   **em loop infinito** (reinicia a cada 5s), sem nenhuma checagem.
 - `.code-cursor` (`globals.css`) — `blink` infinito.
-- `animate-pulse` do `SkeletonCard` (`ProjectsSection.tsx:20`).
+- ~~`animate-pulse` do `SkeletonCard`~~ — resolvido por tabela: o skeleton
+  deixou de existir quando a seção virou Server Component (§3.2).
 
 Regras: `reduced-motion` (severidade **High**), `excessive-motion` ("animar 1–2
 elementos por view no máximo"; o hero anima 36 paths SVG + o typewriter + o
@@ -174,7 +176,7 @@ O `__Inter_Fallback_*` é a fonte de fallback com métricas ajustadas que o
 next/font gera sozinho — ela também remove o layout shift da troca de fonte,
 que era o segundo item de `font-loading`.
 
-### 3.2 Os repositórios são buscados no cliente, sem cache — `content-jumping`, `lazy-loading`
+### 3.2 ✅ CORRIGIDO — Os repositórios eram buscados no cliente, sem cache — `content-jumping`, `lazy-loading`
 
 `ProjectsSection.tsx:38` faz `fetch("https://api.github.com/...")` dentro de um
 `useEffect`:
@@ -188,15 +190,33 @@ que era o segundo item de `font-loading`.
   acontece — ou seja, o problema já foi diagnosticado e mitigado, não removido.
 - `ProjectsSection` é `"use client"` só por causa disso.
 
-Correção: Server Component com cache do Next, o que elimina o estado de loading,
-o CLS, o `ResizeObserver` e o JS do cliente de uma vez:
+**Aplicado:** `ProjectsSection` virou um Server Component assíncrono com
+`next: { revalidate: 3600 }`. Saíram o `"use client"`, os três `useState`, o
+`useEffect` e o `SkeletonCard` inteiro — o HTML já chega com os repositórios
+dentro, então não existe mais estado de carregamento para exibir.
 
-```ts
-const res = await fetch(
-  "https://api.github.com/users/NyckzXD/repos?sort=updated&per_page=6",
-  { next: { revalidate: 3600 } }
-);
+Um detalhe que só aparece ao mover a chamada para o servidor: **a API do
+GitHub responde 403 sem `User-Agent`**. No navegador ele ia automaticamente;
+em Node, não. O header foi adicionado explicitamente.
+
+Verificado com build limpo (`rm -rf .next && npx next build`):
+
 ```
+.next/prerender-manifest.json   → "/" : initialRevalidateSeconds = 3600
+.next/cache/fetch-cache/f86ee…  → revalidate = 3600, url = api.github.com/users/NyckzXD/repos
+.next/server/app/index.html     → contém "FootballPredictor"   // repos no HTML estático
+```
+
+E no navegador: 6 cards renderizados, **nenhuma** requisição a
+`api.github.com` saindo do cliente, JS da rota caindo de 53,4 kB → **52,3 kB**.
+
+Resultado: uma requisição por hora para o site inteiro, em vez de uma por
+visitante — o rate limit de 60/h deixa de ser alcançável pelo tráfego.
+
+O `ResizeObserver` de `smooth-scroll.tsx:254-269` **foi mantido**: a causa que
+o motivou desapareceu, mas ele ainda cobre outras mudanças de altura (fonte,
+barra de endereço no mobile). Removê-lo é decisão à parte, com risco de
+regressão no `ScrollTrigger`.
 
 ### 3.3 Três bibliotecas de animação no bundle
 
@@ -317,17 +337,30 @@ estrutura (cards, inputs) e manter 0.12 nos divisores decorativos.
 
 ## 7. Formulários e Feedback (MÉDIO)
 
-### 7.1 Estado de erro sem recuperação — `error-recovery`, `error-clarity`
+### 7.1 ✅ CORRIGIDO (junto com §3.2) — Estado de erro sem recuperação — `error-recovery`, `error-clarity`
 
-`ProjectsSection.tsx:66-70` mostra "Erro ao carregar repositórios." e para aí:
-sem causa, sem botão de tentar de novo, sem link alternativo. Dado o rate limit
+**Aplicado:** a mensagem passou a oferecer caminho de saída — "Não foi possível
+carregar os repositórios agora. Eles continuam acessíveis **direto no
+GitHub**", com link para o perfil. Num Server Component não existe "tentar de
+novo" no cliente para oferecer: o caminho de recuperação *é* o link externo,
+e o próprio ISR se recupera sozinho na revalidação seguinte.
+
+O texto original dizia:
+
+`ProjectsSection.tsx:66-70` mostrava "Erro ao carregar repositórios." e parava
+aí: sem causa, sem botão de tentar de novo, sem link alternativo. Dado o rate limit
 de 60 req/h do §3.2, é um caminho que visitantes reais vão encontrar.
 
-### 7.2 Nenhum estado vazio — `empty-states`
+### 7.2 ✅ CORRIGIDO (junto com §3.2) — Nenhum estado vazio — `empty-states`
 
-Se a API devolver `[]` (conta sem repos públicos, filtro futuro), cai em
-`loading=false`, `error=false`, `repos=[]` → a grade renderiza **nada**, sem
-explicação. Só sobra o botão do footer da seção.
+Antes, se a API devolvesse `[]`, caía em `loading=false`, `error=false`,
+`repos=[]` → a grade renderizava **nada**, sem explicação.
+
+**Aplicado:** sem o flag de carregamento, erro e lista vazia viraram dois
+ramos explícitos (`repos === null` e `repos.length === 0`), cada um com seu
+texto. O vazio agora diz "Ainda não há repositórios públicos para mostrar
+aqui." Os dois dividem o mesmo componente `Aviso`, então a seção nunca
+renderiza um buraco.
 
 ### 7.3 Sem contato real — recomendação do pattern
 
@@ -365,15 +398,15 @@ funciona nos dois caminhos.
 | 1 | Anel de foco visível nos botões (§1.1) | `ui/origin-button.tsx:237` | baixo | ✅ feito |
 | 2 | Alvos de toque ≥44px (§2.1) | `Footer.tsx`, `HeroSection.tsx:192`, `Navbar.tsx:53,62,92,100` | baixo | ✅ feito |
 | 3 | `next/font` e remover o `@import` duplicado (§3.1) | `layout.tsx`, `globals.css:1`, `tailwind.config.js` | baixo | ✅ feito |
-| 4 | Repos via Server Component com `revalidate` (§3.2) | `ProjectsSection.tsx` | médio | — |
-| 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx` | baixo |
-| 6 | Card de projeto clicável inteiro (§2.2) | `ProjectsSection.tsx:74` | baixo |
-| 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx` | baixo |
-| 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | todas as seções | baixo |
-| 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js` | médio |
-| 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css` | médio |
-| 11 | Estado vazio + retry nos projetos (§7.1, §7.2) | `ProjectsSection.tsx` | baixo |
-| 12 | Scroll-spy na navbar + `scroll-margin-top` (§8.1, §8.2) | `Navbar.tsx`, `globals.css` | médio |
+| 4 | Repos via Server Component com `revalidate` (§3.2) | `ProjectsSection.tsx` | médio | ✅ feito |
+| 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx` | baixo | — |
+| 6 | Card de projeto clicável inteiro (§2.2) | `ProjectsSection.tsx:74` | baixo | — |
+| 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx` | baixo | — |
+| 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | todas as seções | baixo | — |
+| 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js` | médio | — |
+| 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css` | médio | — |
+| 11 | Estado vazio + recuperação nos projetos (§7.1, §7.2) | `ProjectsSection.tsx` | baixo | ✅ saiu junto com o 4 |
+| 12 | Scroll-spy na navbar + `scroll-margin-top` (§8.1, §8.2) | `Navbar.tsx`, `globals.css` | médio | — |
 
 ## Fora do escopo do plugin, mas adjacente
 
