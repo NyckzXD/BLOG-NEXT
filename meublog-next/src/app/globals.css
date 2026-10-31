@@ -84,9 +84,9 @@
      que é justamente o lugar que ele precisa ocupar. z acima da navbar
      (z-[100]) para não aparecer atrás dela quando ganha foco.
 
-     translateY explícito nos dois estados pelo mesmo motivo do `.repo-card`:
-     as utilities de translate do Tailwind montam o transform a partir de
-     custom properties e não interpolam de forma confiável. */
+     translateY explícito nos dois estados em vez das utilities de translate
+     do Tailwind: elas montam o transform a partir de custom properties e não
+     interpolam de forma confiável a partir de `transform: none`. */
   .skip-link {
     @apply fixed left-4 top-4 z-[200] inline-flex min-h-11 items-center rounded-lg border border-accent2/40 bg-bg2 px-4 font-mono text-sm text-text-main transition-transform duration-150 motion-reduce:transition-none;
     transform: translateY(-200%);
@@ -123,24 +123,27 @@
     @apply border-accent2/40 text-accent2;
   }
 
+  /* O card de repositório agora se inclina acompanhando o ponteiro
+     (ProjectCard), e a inclinação é escrita como `transform` inline pelo
+     motion. Por isso o lift de hover que vivia aqui saiu: dois donos do mesmo
+     `transform` significam o inline sempre ganhando, e o CSS restante
+     continuaria valendo só no modo de menos movimento — onde justamente não
+     deveria haver movimento nenhum. A transição fica restrita a borda e
+     sombra pelo mesmo motivo: `transition-all` colocaria o transform da mola
+     na fila do CSS também.
+
+     Cor, borda e fundo são os mesmos de antes; o que muda é o raio (mais
+     arredondado, para o formato do card de referência) e o respiro interno. */
   .repo-card {
-    @apply flex flex-col gap-3 rounded-xl border border-border bg-bg p-5 transition-all duration-200;
-    /* translateY explícito nos dois estados, em vez de `-translate-y-1`.
-       As utilities de translate do Tailwind montam o transform a partir de
-       custom properties (`translate(var(--tw-translate-x), ...)`), e
-       interpolar isso a partir de `transform: none` trava: medido no
-       navegador, o card ficava em matrix(1,0,0,1,0,0) para sempre — ou seja,
-       o "levanta no hover" nunca acontecia. Com a transição desligada os 4px
-       aparecem, o que confirma a causa. Valores diretos interpolam normal. */
-    transform: translateY(0);
+    @apply flex flex-col rounded-[1.75rem] border border-border bg-bg p-7;
+    @apply transition-[border-color,box-shadow] duration-300 motion-reduce:transition-none;
   }
-  /* focus-within junto do hover: agora que o card inteiro é o link (stretched
-     link em ProjectsSection), quem chega pelo teclado precisa do mesmo retorno
-     visual de quem chega pelo mouse. */
+  /* focus-within junto do hover: o card inteiro é o link (stretched link em
+     ProjectCard), então quem chega pelo teclado recebe o mesmo retorno visual
+     de quem chega pelo mouse. */
   .repo-card:hover,
   .repo-card:focus-within {
     @apply border-accent2/35 shadow-card;
-    transform: translateY(-4px);
   }
 
   .career-card {

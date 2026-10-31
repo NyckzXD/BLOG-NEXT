@@ -1,5 +1,6 @@
-import { BookOpen, Star, GitFork, ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { OriginButton } from "@/components/ui/origin-button";
+import { ProjectCard } from "@/components/ui/project-card";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 
@@ -93,59 +94,17 @@ export default async function ProjectsSection() {
         ) : repos.length === 0 ? (
           <Aviso>Ainda não há repositórios públicos para mostrar aqui.</Aviso>
         ) : (
-          <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {repos.map((repo, i) => (
-              <Reveal key={repo.id} delay={(i % 3) * 0.08}>
-                <article className="repo-card relative h-full">
-                  {/*
-                    h3 porque o h2 da seção vem do SectionHeading: assim a
-                    lista de projetos fica navegável por headings no leitor de
-                    tela, que era a única forma de pular de repositório em
-                    repositório sem passar por todo o conteúdo de cada card.
-                    O Tailwind já zera tamanho e peso dos headings no
-                    preflight, então o visual não muda.
-                  */}
-                  <h3 className="flex items-center gap-2 text-base font-semibold text-accent2">
-                    <BookOpen size={15} className="text-muted" />
-                    {/*
-                      Stretched link: o ::after cobre o card inteiro, então
-                      clicar em qualquer ponto abre o repositório — antes só o
-                      texto do título era clicável, embora o card inteiro se
-                      levantasse no hover.
-
-                      O `truncate` saiu do <a> e foi para o <span> de dentro
-                      de propósito: `truncate` traz `overflow: hidden`, que
-                      recortaria o ::after no tamanho do próprio texto e
-                      anularia a área estendida.
-                    */}
-                    <a
-                      href={repo.html_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="min-w-0 after:absolute after:inset-0 hover:underline"
-                    >
-                      <span className="block truncate">{repo.name}</span>
-                    </a>
-                    <ArrowUpRight size={13} className="ml-auto flex-none text-muted" />
-                  </h3>
-                  <p className="flex-1 text-sm text-muted">
-                    {repo.description || "Sem descrição"}
-                  </p>
-                  <div className="flex gap-4 font-mono text-xs text-muted">
-                    <span className="flex items-center gap-1.5">
-                      <Star size={13} /> {repo.stargazers_count}
-                    </span>
-                    <span className="flex items-center gap-1.5">
-                      <GitFork size={13} /> {repo.forks_count}
-                    </span>
-                    {repo.language && (
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-                        {repo.language}
-                      </span>
-                    )}
-                  </div>
-                </article>
+              <Reveal key={repo.id} delay={(i % 3) * 0.08} className="h-full">
+                <ProjectCard
+                  name={repo.name}
+                  description={repo.description}
+                  url={repo.html_url}
+                  stars={repo.stargazers_count}
+                  forks={repo.forks_count}
+                  language={repo.language}
+                />
               </Reveal>
             ))}
           </div>
