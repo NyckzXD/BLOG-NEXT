@@ -146,11 +146,17 @@
     @apply border-accent2/35 shadow-card;
   }
 
+  /* O deslocamento lateral de hover saiu daqui pelo mesmo motivo do
+     `.repo-card`: o `transform` agora pertence ao motion (ver useTilt), e o
+     inline sempre venceria a regra do CSS. Cores, borda e raio seguem os
+     mesmos; só a sombra responde ao hover. */
   .career-card {
-    @apply rounded-xl border border-l-[3px] border-border border-l-accent bg-bg2 p-5 transition-all duration-200;
+    @apply rounded-xl border border-l-[3px] border-border border-l-accent bg-bg2 p-5;
+    @apply transition-shadow duration-300 motion-reduce:transition-none;
   }
-  .career-card:hover {
-    @apply translate-x-1 shadow-card;
+  .career-card:hover,
+  .career-card:focus-within {
+    @apply shadow-card;
   }
 
   .c-keyword { color: theme('colors.syntax.keyword'); }

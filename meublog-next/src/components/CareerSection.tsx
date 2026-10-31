@@ -1,4 +1,5 @@
-import { Briefcase, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
+import { CareerCard } from "@/components/ui/career-card";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { OriginButton } from "@/components/ui/origin-button";
@@ -38,19 +39,7 @@ export default function CareerSection() {
         <div className="mb-10 flex flex-col gap-3">
           {CAREER_CARDS.map((card, i) => (
             <Reveal key={card.title} delay={i * 0.08}>
-              <article className="career-card flex items-center gap-4">
-                <span className="flex h-10 w-10 flex-none items-center justify-center rounded-lg bg-accent/10 text-accent">
-                  <Briefcase size={18} />
-                </span>
-                <div>
-                  <h3 className="text-base font-semibold text-accent2">
-                    {card.title}
-                  </h3>
-                  <div className="font-mono text-sm text-muted">
-                    {card.dates}
-                  </div>
-                </div>
-              </article>
+              <CareerCard title={card.title} dates={card.dates} />
             </Reveal>
           ))}
         </div>
