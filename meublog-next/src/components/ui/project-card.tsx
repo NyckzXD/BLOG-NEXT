@@ -36,7 +36,10 @@ export function ProjectCard({
           do tamanho do card. O ícone não tem nada clicável dentro, então é
           onde a profundidade sai de graça.
         */}
-        <div className="flex items-center gap-3" style={lift(38)}>
+        <div
+          className="pointer-events-none flex items-center gap-3"
+          style={lift(38)}
+        >
           <div className="flex h-12 w-12 flex-none items-center justify-center rounded-2xl border border-border bg-bg3 text-accent2 shadow-sm transition-all duration-500 group-hover:border-accent2/40 group-hover:bg-accent2 group-hover:text-bg group-hover:shadow-card">
             <BookOpen size={20} strokeWidth={1.6} />
           </div>
@@ -86,7 +89,18 @@ export function ProjectCard({
           )}
         </div>
 
-        <div className="mt-auto flex items-center pt-6 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-accent2">
+        {/*
+          `pointer-events-none` aqui e no cabeçalho do ícone: os dois ficam por
+          cima do `::after` do stretched link e roubavam o clique — o do ícone
+          por causa do `translateZ`, que o traz para a frente no espaço 3D, e
+          este porque o `relative` do <span> do sublinhado o torna posicionado,
+          e posicionado pinta acima do `::after`, que vem antes no DOM.
+          Resultado: passar o mouse sobre "Ver repositório", justamente o
+          convite a clicar, era o único ponto morto do card. Nenhum dos dois
+          tem nada interativo dentro, então ignorar o ponteiro devolve a área
+          ao link sem custo nenhum.
+        */}
+        <div className="pointer-events-none mt-auto flex items-center pt-6 font-mono text-[11px] font-semibold uppercase tracking-[0.18em] text-accent2">
           <span className="relative">
             Ver repositório
             {/* `origin-left` + scale-x: o sublinhado cresce da esquerda em vez
