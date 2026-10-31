@@ -61,6 +61,24 @@
 }
 
 @layer components {
+  /* Sai da tela por transform, não por `display: none` nem
+     `visibility: hidden`: esses dois tirariam o link da ordem de tabulação,
+     que é justamente o lugar que ele precisa ocupar. z acima da navbar
+     (z-[100]) para não aparecer atrás dela quando ganha foco.
+
+     translateY explícito nos dois estados pelo mesmo motivo do `.repo-card`:
+     as utilities de translate do Tailwind montam o transform a partir de
+     custom properties e não interpolam de forma confiável. */
+  .skip-link {
+    @apply fixed left-4 top-4 z-[200] inline-flex min-h-11 items-center rounded-lg border border-accent2/40 bg-bg2 px-4 font-mono text-[0.82rem] text-text-main transition-transform duration-150 motion-reduce:transition-none;
+    transform: translateY(-200%);
+  }
+  /* `:focus`, não `:focus-visible`: o link só é alcançável por teclado, e
+     assim ele também aparece se o foco chegar por programa. */
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+
   .accent-text {
     @apply bg-clip-text text-transparent;
     background-image: linear-gradient(135deg, theme('colors.accent'), theme('colors.accent2'));

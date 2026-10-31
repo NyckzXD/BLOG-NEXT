@@ -18,11 +18,16 @@ const PARAGRAPHS = [
 
 export default function AboutSection() {
   return (
-    <section id="sobre" className="px-[5%] py-24">
+    <section
+      id="sobre"
+      aria-labelledby="sobre-titulo"
+      className="px-[5%] py-24"
+    >
       <div className="mx-auto max-w-5xl">
         <SectionHeading
           eyebrow="// 01. Sobre"
           title="Sobre mim"
+          titleId="sobre-titulo"
           description="Um pouco da minha trajetória e do que me move como desenvolvedor."
         />
 

@@ -49,6 +49,19 @@ export default function RootLayout({
   return (
     <html lang="pt-br" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
+        {/*
+          Primeiro elemento focável do documento. Com navbar fixa e uma página
+          longa de âncoras, quem navega por teclado tinha de passar pelos cinco
+          controles da navegação a cada visita antes de alcançar o conteúdo.
+          Fica fora da tela até receber foco (ver `.skip-link` em globals.css).
+
+          `data-native-anchor` pede ao SmoothScroll que não intercepte este
+          clique: o foco só se move pela navegação de fragmento nativa, que o
+          preventDefault dele cancelaria — ver o comentário lá.
+        */}
+        <a href="#conteudo" data-native-anchor className="skip-link">
+          Pular para o conteúdo
+        </a>
         <SmoothScroll />
         {children}
       </body>

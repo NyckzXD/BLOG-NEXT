@@ -23,7 +23,7 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1 a 6** da tabela de prioridade foram aplicados em 31/10/2026
+Os itens **1 a 7** da tabela de prioridade foram aplicados em 31/10/2026
 e verificados no navegador (`npx next build` passa; medições abaixo em cada
 seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
 componente. Os demais seguem em aberto.
@@ -103,22 +103,81 @@ normal o hero ainda anima 36 paths SVG + typewriter + cursor ao mesmo tempo.
 Isso é o §3.4, que o item 5 **não** resolve — ele só tira o custo de quem
 pediu menos movimento.
 
-### 1.3 Falta skip link — `skip-links`
+### 1.3 ✅ CORRIGIDO — Falta skip link — `skip-links`
 
-Com navbar fixa e uma página longa de âncoras, não existe "pular para o
-conteúdo". Nenhum `<a href="#main">` no `layout.tsx` nem no `page.tsx`, e o
-`<main>` em `page.tsx:13` não tem `id`.
+Com navbar fixa e uma página longa de âncoras, não existia "pular para o
+conteúdo": quem navega por teclado passava pelos cinco controles da navegação,
+a cada visita, antes de alcançar o primeiro conteúdo.
 
-### 1.4 Hierarquia de headings quebra nos cards — `heading-hierarchy`
+**Aplicado:** `<a href="#conteudo" class="skip-link">` como primeiro elemento
+do `<body>` (`layout.tsx`), `<main id="conteudo" tabIndex={-1}>` em `page.tsx`,
+e o estilo `.skip-link` em `globals.css` — fora da tela por
+`translateY(-200%)`, visível no `:focus`, `z-index: 200` para ficar acima da
+navbar (que é `z-[100]`).
 
-`h1` no hero e `h2` nos `SectionHeading` estão certos, mas os títulos dos cards
-são `div`, não `h3`:
+Dois detalhes sem os quais o link existiria sem funcionar:
 
-- `ProjectsSection.tsx:75` — nome do repositório em `<div className="...font-semibold">`
-- `CareerSection.tsx:41` — cargo em `<div className="text-base font-semibold">`
+1. **O `<main>` precisa de `tabIndex={-1}`.** Sem isso o alvo do fragmento não
+   é focável: a página rola e o foco do teclado fica para trás, na navegação —
+   exatamente o que o link existe para pular.
+2. **O `SmoothScroll` interceptava o clique.** `smooth-scroll.tsx` dá
+   `preventDefault()` em *todo* `a[href^="#"]` para delegar ao Lenis, e é a
+   navegação de fragmento nativa que move o foco. O skip link ganhou
+   `data-native-anchor` e o handler passou a ignorá-lo. O salto instantâneo
+   também é o comportamento esperado de um atalho desses — 1,1s de scroll
+   animado num "pular para o conteúdo" seria o oposto do objetivo.
 
-Leitor de tela não consegue navegar a lista de projetos por headings. As
-`<section>` também não têm `aria-labelledby` ligando ao próprio `h2`.
+Verificado com teclado de verdade (`Tab` e `Enter` reais, não `.focus()`):
+
+```
+Tab    → .skip-link, primeiro focável do documento, visível em top: 16px, à frente da navbar
+Enter  → document.activeElement = MAIN#conteudo
+Tab    → "Ver projetos", dentro do main — os 5 controles da navbar foram pulados
+```
+
+E as âncoras normais seguem no caminho do Lenis: clicar em "carreira" ainda
+para a seção a 72px do topo (o `NAV_OFFSET`), não em 0.
+
+**Observação para quando §5.4 for mexido:** o `<main>` recebe o outline de foco
+global (`solid 2px`, offset 3px), hoje invisível porque o `overflow-x: hidden`
+do `html` corta as bordas laterais e a de cima. Se esse `overflow-x` sair, vai
+aparecer um retângulo de 2px em volta da página inteira — aí o outline precisa
+ser escopado para fora do alvo do skip link.
+
+### 1.4 ✅ CORRIGIDO — Hierarquia de headings quebra nos cards — `heading-hierarchy`
+
+`h1` no hero e `h2` nos `SectionHeading` estavam certos, mas os títulos dos
+cards eram `div`, não `h3` — leitor de tela não conseguia navegar a lista de
+projetos por headings, só lendo card por card. As `<section>` também não tinham
+`aria-labelledby` ligando ao próprio `h2`, então não eram anunciadas como
+região nem apareciam na lista de landmarks.
+
+**Aplicado:**
+
+- `ProjectsSection.tsx` — nome do repositório virou `h3`, e o card virou
+  `<article>`, acompanhando o que o `CareerSection` já fazia.
+- `CareerSection.tsx` — cargo virou `h3`.
+- `SectionHeading` ganhou a prop `titleId`; as três seções passaram a ter
+  `aria-labelledby` apontando para o próprio `h2`.
+
+O Tailwind zera tamanho e peso dos headings no preflight, então nada mudou
+visualmente — medido: o título do repo continua em 15.2px/600, o da carreira em
+16px/600, `margin: 0` nos dois.
+
+Outline resultante, lido do DOM:
+
+```
+H1 Oi, eu sou Nycolas Fernandes
+  H2 #sobre-titulo     Sobre mim
+  H2                   Do primeiro commit ao próximo projeto   (cena de parallax, decorativa)
+  H2 #projetos-titulo  Projetos no GitHub
+    H3 × 6               um por repositório
+  H2 #carreira-titulo  Carreira profissional
+    H3 × 2               um por cargo
+```
+
+Nenhum nível pulado, e as três `<section>` resolvem para o nome certo
+(`section#sobre → "Sobre mim"`, e assim por diante).
 
 ### 1.5 Menu mobile sem rotas de escape — `escape-routes`, `modal-escape`, `focus-management`
 
@@ -475,7 +534,7 @@ funciona nos dois caminhos.
 | 4 | Repos via Server Component com `revalidate` (§3.2) | `ProjectsSection.tsx` | médio | ✅ feito |
 | 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx`, `globals.css` | baixo | ✅ feito |
 | 6 | Card de projeto clicável inteiro (§2.2, §2.2b) | `ProjectsSection.tsx`, `globals.css` | baixo | ✅ feito |
-| 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx` | baixo | — |
+| 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx`, `page.tsx`, `ui/section-heading.tsx`, `ui/smooth-scroll.tsx`, `globals.css` | baixo | ✅ feito |
 | 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | todas as seções | baixo | — |
 | 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js` | médio | — |
 | 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css` | médio | — |

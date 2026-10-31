@@ -10,7 +10,9 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main>
+      {/* tabIndex -1: o <main> não é focável por padrão, e sem isso o skip
+          link rolaria a página sem levar o foco do teclado com ele. */}
+      <main id="conteudo" tabIndex={-1}>
         <HeroSection />
         <AboutSection />
         <ParallaxScene />

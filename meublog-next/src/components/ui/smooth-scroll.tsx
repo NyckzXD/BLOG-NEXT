@@ -218,6 +218,14 @@ export function SmoothScroll() {
       const href = anchor?.getAttribute("href");
       if (!href || !href.startsWith("#")) return;
 
+      // Âncoras marcadas com data-native-anchor ficam de fora (hoje, o skip
+      // link). O preventDefault abaixo cancela a navegação de fragmento do
+      // navegador, e é ela que move o foco do teclado para o alvo — sem isso
+      // o skip link rolaria a página e deixaria o foco para trás, na
+      // navegação, que é exatamente o que ele existe para evitar. Um salto
+      // instantâneo também é o comportamento esperado de um atalho desses.
+      if (anchor?.hasAttribute("data-native-anchor")) return;
+
       const target = href === "#" ? null : document.querySelector(href);
       if (href !== "#" && !target) return;
 

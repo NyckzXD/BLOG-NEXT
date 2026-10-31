@@ -22,11 +22,16 @@ const SKILLS_LIST = [
 
 export default function CareerSection() {
   return (
-    <section id="carreira" className="px-[5%] py-24">
+    <section
+      id="carreira"
+      aria-labelledby="carreira-titulo"
+      className="px-[5%] py-24"
+    >
       <div className="mx-auto max-w-5xl">
         <SectionHeading
           eyebrow="// 03. Carreira"
           title="Carreira profissional"
+          titleId="carreira-titulo"
           description="Experiências e formação até aqui."
         />
 
@@ -38,9 +43,9 @@ export default function CareerSection() {
                   <Briefcase size={18} />
                 </span>
                 <div>
-                  <div className="text-base font-semibold text-accent2">
+                  <h3 className="text-base font-semibold text-accent2">
                     {card.title}
-                  </div>
+                  </h3>
                   <div className="font-mono text-[0.83rem] text-muted">
                     {card.dates}
                   </div>

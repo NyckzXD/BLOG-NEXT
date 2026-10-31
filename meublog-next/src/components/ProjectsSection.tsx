@@ -62,11 +62,16 @@ export default async function ProjectsSection() {
   const repos = await getRepos();
 
   return (
-    <section id="projetos" className="border-y border-border bg-bg2 px-[5%] py-24">
+    <section
+      id="projetos"
+      aria-labelledby="projetos-titulo"
+      className="border-y border-border bg-bg2 px-[5%] py-24"
+    >
       <div className="mx-auto max-w-5xl">
         <SectionHeading
           eyebrow="// 02. Projetos"
           title="Projetos no GitHub"
+          titleId="projetos-titulo"
           description="Repositórios públicos mais recentes, atualizados automaticamente."
         />
 
@@ -90,8 +95,16 @@ export default async function ProjectsSection() {
           <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {repos.map((repo, i) => (
               <Reveal key={repo.id} delay={(i % 3) * 0.08}>
-                <div className="repo-card relative h-full">
-                  <div className="flex items-center gap-2 text-[0.95rem] font-semibold text-accent2">
+                <article className="repo-card relative h-full">
+                  {/*
+                    h3 porque o h2 da seção vem do SectionHeading: assim a
+                    lista de projetos fica navegável por headings no leitor de
+                    tela, que era a única forma de pular de repositório em
+                    repositório sem passar por todo o conteúdo de cada card.
+                    O Tailwind já zera tamanho e peso dos headings no
+                    preflight, então o visual não muda.
+                  */}
+                  <h3 className="flex items-center gap-2 text-[0.95rem] font-semibold text-accent2">
                     <BookOpen size={15} className="text-muted" />
                     {/*
                       Stretched link: o ::after cobre o card inteiro, então
@@ -113,7 +126,7 @@ export default async function ProjectsSection() {
                       <span className="block truncate">{repo.name}</span>
                     </a>
                     <ArrowUpRight size={13} className="ml-auto flex-none text-muted" />
-                  </div>
+                  </h3>
                   <p className="flex-1 text-[0.85rem] leading-relaxed text-muted">
                     {repo.description || "Sem descrição"}
                   </p>
@@ -131,7 +144,7 @@ export default async function ProjectsSection() {
                       </span>
                     )}
                   </div>
-                </div>
+                </article>
               </Reveal>
             ))}
           </div>
