@@ -16,8 +16,9 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "monospace"],
+        // As variáveis vêm do next/font, declaradas no <html> em layout.tsx.
+        sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
       },
       colors: {
         bg: "#000000",

@@ -50,7 +50,7 @@ export default function Navbar() {
           <a
             key={link.href}
             href={link.href}
-            className="rounded-md px-3.5 py-1.5 font-mono text-[0.82rem] text-muted transition-colors duration-200 hover:bg-bg3 hover:text-text-main"
+            className="inline-flex h-11 items-center rounded-md px-3.5 font-mono text-[0.82rem] text-muted transition-colors duration-200 hover:bg-bg3 hover:text-text-main"
           >
             {link.label}
           </a>
@@ -59,7 +59,7 @@ export default function Navbar() {
         <OriginButton
           variant="dark"
           href="mailto:nycolas.tec@gmail.com"
-          className="ml-2 h-9 gap-1.5 rounded-lg px-4 text-sm"
+          className="ml-2 h-11 gap-1.5 rounded-lg px-4 text-sm"
         >
           <Mail size={14} />
           contato
@@ -89,7 +89,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="rounded-md px-2 py-2.5 font-mono text-sm text-muted hover:bg-bg3 hover:text-text-main"
+                className="rounded-md px-2 py-3 font-mono text-sm text-muted hover:bg-bg3 hover:text-text-main"
               >
                 {link.label}
               </a>
@@ -97,7 +97,7 @@ export default function Navbar() {
             <a
               href="mailto:nycolas.tec@gmail.com"
               onClick={() => setMenuOpen(false)}
-              className="mt-1 flex items-center gap-2 rounded-md px-2 py-2.5 font-mono text-sm text-accent2"
+              className="mt-1 flex items-center gap-2 rounded-md px-2 py-3 font-mono text-sm text-accent2"
             >
               <Mail size={14} />
               contato

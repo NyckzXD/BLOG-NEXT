@@ -13,7 +13,7 @@ export default function Footer() {
           target="_blank"
           rel="noreferrer"
           aria-label="GitHub"
-          className="text-muted transition-colors duration-200 hover:text-accent2"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted transition-colors duration-200 hover:bg-bg3 hover:text-accent2"
         >
           <Github size={18} />
         </a>

@@ -1,0 +1,387 @@
+# Análise UI/UX — nycolas.dev
+
+Auditoria do portfólio em `meublog-next/` usando o plugin **ui-ux-pro-max v2.6.2**
+(`cli/assets/scripts/search.py`), seguindo a ordem de prioridade do skill
+(1 Acessibilidade → 10 Dados). Cada achado cita a regra do plugin que ele viola.
+
+## Perfil retornado pelo plugin
+
+```
+python scripts/search.py "developer portfolio personal site dark minimal" --design-system
+```
+
+| Dimensão | Recomendação do plugin | O que o projeto faz |
+|---|---|---|
+| Pattern | **Portfolio Grid** — Hero → Grid de projetos → Sobre → Contato | Hero → Sobre → Parallax → Projetos → Carreira (sem seção de contato) |
+| Estilo | **Motion-Driven** (parallax, scroll anim, microinterações) | ✅ Bate exatamente — Lenis + GSAP + Motion |
+| Perf/A11y do estilo | ⚠ `Good` / ⚠ exige `prefers-reduced-motion` | Parcial — ver §1.2 |
+| CTA | Hover do card de projeto + contato no footer | Card não é clicável; footer não tem CTA |
+| Cor | Fundo neutro, acento mínimo | ✅ Monocromático neutro |
+
+O estilo escolhido está **certo** para o tipo de produto. Os problemas são de
+execução, não de direção.
+
+## Status
+
+Os itens **1, 2 e 3** da tabela de prioridade foram aplicados em 31/10/2026 e
+verificados no navegador (`npx next build` passa; medições abaixo em cada
+seção). Os demais seguem em aberto.
+
+---
+
+## 1. Acessibilidade (CRÍTICO)
+
+### 1.1 ✅ CORRIGIDO — O anel de foco dos botões principais era invisível — `focus-states`
+
+`src/components/ui/origin-button.tsx:237` aplica `focus-visible:outline-none` e
+o substitui por `ring-2 ring-[var(--color-ring)]`. Os valores de `--ic-ring`
+são translúcidos demais:
+
+| Variante | Anel resultante | vs. fundo do botão | WCAG 2.4.11 |
+|---|---|---|---|
+| `dark` — `rgba(246,243,236,0.18)` sobre `#171716` | `#3f3f3d` | **1.70:1** | ❌ exige 3:1 |
+| `light` — `rgba(17,17,17,0.16)` sobre `#ffffff` | `#d9d9d9` | **1.41:1** | ❌ exige 3:1 |
+
+Como o `outline-none` também cancela o fallback global de `globals.css`
+(`:focus-visible { outline: 2px solid accent }`), quem navega por teclado **não
+vê onde está** nos CTAs principais do site ("Ver projetos", "Falar comigo",
+"contato", "Entrar em contato"). É o achado mais grave da auditoria.
+
+**Aplicado:** removidas as classes `focus-visible:outline-none`/`ring-*` de
+`origin-button.tsx`, deixando o `:focus-visible` global do `globals.css` agir.
+Como ele desenha o outline 3px **fora** do botão, o indicador contrasta com o
+fundo da página e não com o preenchimento — o que resolve as duas variantes de
+uma vez e elimina de quebra o `ring-offset` apontado para a cor errada.
+
+Verificado com Tab real no navegador, foco em "Ver projetos":
+
+```
+matchesFocusVisible: true
+outline: rgb(212, 212, 216) solid 2px   // #d4d4d8 = 14,21:1 sobre #000000 ✅
+outlineOffset: 3px
+boxShadow: none                          // o ring quebrado não existe mais
+```
+
+### 1.2 `prefers-reduced-motion` cobre as animações grandes, mas não as pequenas
+
+Tratado corretamente em `smooth-scroll.tsx:189`, `parallax-scene.tsx:39` e
+`floating-paths.tsx` (via `useReducedMotion`). **Não** tratado em:
+
+- `ui/reveal.tsx` — usado em todas as seções; sempre anima `opacity` + `y`.
+- O typewriter de `HeroSection.tsx:114` — reescreve `innerHTML` a cada ~40ms
+  **em loop infinito** (reinicia a cada 5s), sem nenhuma checagem.
+- `.code-cursor` (`globals.css`) — `blink` infinito.
+- `animate-pulse` do `SkeletonCard` (`ProjectsSection.tsx:20`).
+
+Regras: `reduced-motion` (severidade **High**), `excessive-motion` ("animar 1–2
+elementos por view no máximo"; o hero anima 36 paths SVG + o typewriter + o
+cursor simultaneamente).
+
+### 1.3 Falta skip link — `skip-links`
+
+Com navbar fixa e uma página longa de âncoras, não existe "pular para o
+conteúdo". Nenhum `<a href="#main">` no `layout.tsx` nem no `page.tsx`, e o
+`<main>` em `page.tsx:13` não tem `id`.
+
+### 1.4 Hierarquia de headings quebra nos cards — `heading-hierarchy`
+
+`h1` no hero e `h2` nos `SectionHeading` estão certos, mas os títulos dos cards
+são `div`, não `h3`:
+
+- `ProjectsSection.tsx:75` — nome do repositório em `<div className="...font-semibold">`
+- `CareerSection.tsx:41` — cargo em `<div className="text-base font-semibold">`
+
+Leitor de tela não consegue navegar a lista de projetos por headings. As
+`<section>` também não têm `aria-labelledby` ligando ao próprio `h2`.
+
+### 1.5 Menu mobile sem rotas de escape — `escape-routes`, `modal-escape`, `focus-management`
+
+`Navbar.tsx:69` tem `aria-label` e `aria-expanded` ✅, mas falta: `aria-controls`
+(e o painel não tem `id`), fechar no `Escape`, fechar ao clicar fora, e mover o
+foco para dentro do painel ao abrir.
+
+---
+
+## 2. Toque e Interação (CRÍTICO)
+
+### 2.1 ✅ CORRIGIDO (exceto o card) — Alvos de toque abaixo de 44×44px — `touch-target-size`
+
+| Elemento | Antes | Depois (medido no navegador) |
+|---|---|---|
+| Ícone GitHub do footer (`Footer.tsx:11`) | ~18×18px (ícone sem padding) | **44×44** ✅ |
+| Ícones sociais do hero (`HeroSection.tsx:192`) | `h-10 w-10` = 40×40 | **44×44** ✅ |
+| Links da navbar desktop (`Navbar.tsx:53`) | ~34px de altura | **44** ✅ |
+| CTA "contato" da navbar (`Navbar.tsx:62`) | `h-9` = 36px | **44** ✅ |
+| Links do menu mobile (`Navbar.tsx:92,100`) | ~40px | **44** ✅ |
+| Hambúrguer (`Navbar.tsx:73`) | `h-11 w-11` = 44×44 | já estava ✅ |
+| Link do título do repo (`ProjectsSection.tsx:77`) | altura da linha, ~22px | ⏳ sai junto com §2.2 |
+
+O CTA "contato" da navbar não estava no levantamento original: o `h-9` no
+`className` sobrescrevia o `h-12` padrão do `OriginButton`. Apareceu ao medir.
+
+Em 375px não há scroll horizontal (`scrollWidth === innerWidth === 375`).
+
+### 2.2 O card de projeto parece clicável mas não é — `hover-vs-tap`
+
+`.repo-card:hover` levanta o card e muda a borda, sugerindo que o card inteiro é
+um link — mas só o texto do título é `<a>` (`ProjectsSection.tsx:77`). Clicar em
+qualquer outro ponto do card não faz nada. O plugin recomenda justamente
+"Project Card Hover" como CTA primário deste pattern.
+
+Correção: envolver o card no `<a>`, ou usar um overlay stretched-link
+(`<a className="absolute inset-0">` + card `relative`), mantendo o `<h3>` como
+nome acessível.
+
+### 2.3 Feedback só no hover
+
+`.repo-card`, `.skill-tag`, `.career-card` e os links da nav definem apenas
+`:hover`. Em touch não existe estado de pressionado (`press-feedback`). Só o
+`OriginButton` trata `pointerdown` corretamente.
+
+---
+
+## 3. Performance (ALTO)
+
+### 3.1 ✅ CORRIGIDO — A fonte era carregada duas vezes, de forma bloqueante — `font-loading`, `critical-css`
+
+A mesma URL do Google Fonts aparece em dois lugares:
+
+- `src/app/globals.css:1` — `@import url(...)` (**render-blocking**, e dentro do
+  CSS do Tailwind, o pior caso: o navegador só descobre a fonte depois de baixar
+  e parsear o CSS)
+- `src/app/layout.tsx:28` — `<link rel="stylesheet">` para a mesma coisa
+
+Resultado: requisição duplicada + bloqueio de render. O projeto é Next 14 com
+App Router e **não usa `next/font`**, que resolveria tudo isso: self-hosting,
+`font-display: swap` automático, preload do subset correto e zero requisição
+externa (dispensando também os dois `preconnect` de `layout.tsx:25-26`).
+
+**Aplicado:** `next/font/google` em `layout.tsx` com as variáveis `--font-sans`
+e `--font-mono` no `<html>`; `@import` removido de `globals.css:1`; os dois
+`preconnect` removidos (não têm mais função); `tailwind.config.js` passou a ler
+as variáveis. Inter e JetBrains Mono são variable fonts, então não se declara
+`weight` — todos os pesos vêm do mesmo arquivo.
+
+Verificado no navegador após reload:
+
+```
+bodyFont: "__Inter_d8ebd1, __Inter_Fallback_d8ebd1, system-ui, sans-serif"
+monoFont: "__JetBrains_Mono_4dc837, __JetBrains_Mono_Fallback_4dc837, monospace"
+googleFontLinks: []        // nenhuma requisição sai para fonts.googleapis.com
+```
+
+O `__Inter_Fallback_*` é a fonte de fallback com métricas ajustadas que o
+next/font gera sozinho — ela também remove o layout shift da troca de fonte,
+que era o segundo item de `font-loading`.
+
+### 3.2 Os repositórios são buscados no cliente, sem cache — `content-jumping`, `lazy-loading`
+
+`ProjectsSection.tsx:38` faz `fetch("https://api.github.com/...")` dentro de um
+`useEffect`:
+
+- **Rate limit**: a API do GitHub sem autenticação permite 60 req/h **por IP**.
+  Visitantes atrás de um NAT compartilhado veem "Erro ao carregar repositórios."
+- **Sem cache**: toda visita refaz a chamada.
+- **CLS**: o skeleton tem altura fixa; os cards reais variam com o tamanho da
+  descrição. O próprio `smooth-scroll.tsx:254-269` tem um `ResizeObserver`
+  dedicado a consertar o `ScrollTrigger` *depois* que essa mudança de altura
+  acontece — ou seja, o problema já foi diagnosticado e mitigado, não removido.
+- `ProjectsSection` é `"use client"` só por causa disso.
+
+Correção: Server Component com cache do Next, o que elimina o estado de loading,
+o CLS, o `ResizeObserver` e o JS do cliente de uma vez:
+
+```ts
+const res = await fetch(
+  "https://api.github.com/users/NyckzXD/repos?sort=updated&per_page=6",
+  { next: { revalidate: 3600 } }
+);
+```
+
+### 3.3 Três bibliotecas de animação no bundle
+
+`motion` (Framer v11) + `gsap` + `lenis`. GSAP entra só pelo `ScrollTrigger`
+(parallax e sincronia do Lenis) e Motion pelo `Reveal`/`AnimatePresence`. O
+`Reveal` é um fade-up de 28px disparado por viewport — dá para fazer com
+`IntersectionObserver` + a keyframe `fade-up` que **já existe** em
+`tailwind.config.js:60`, removendo o Motion do caminho crítico das seções.
+
+### 3.4 O typewriter reescreve `innerHTML` indefinidamente — `main-thread-budget`
+
+`HeroSection.tsx:103-151`: um `setTimeout` de ~40ms que reescreve o `innerHTML`
+do bloco de código, em loop eterno. Cada reescrita força recálculo de estilo e
+layout. Os comentários no arquivo (linhas 62-69) documentam a briga por thread
+principal com o parallax, resolvida com um sistema de pausa (`pausedRef` +
+`useAnchorScrolling` + `IntersectionObserver`) — muita engenharia para um efeito
+decorativo. Alternativa: animar via CSS (`steps()` + `ch`) ou rodar só uma vez
+em vez de em loop.
+
+---
+
+## 4. Estilo e Consistência (ALTO)
+
+### 4.1 Dois sistemas de token que não se falam — `color-semantic`, `elevation-consistent`
+
+Coexistem no projeto:
+
+1. Tokens do Tailwind (`tailwind.config.js`): `bg`, `bg2`, `bg3`, `accent`,
+   `accent2`, `muted`, `text-main`.
+2. Os ~46 CSS vars `--ic-*`/`--color-*` embutidos em `origin-button.tsx:12-19`,
+   com paleta própria.
+
+E as paletas **divergem**: o botão usa `#f6f3ec` (creme quente) e `#111111`,
+enquanto o site usa `#f5f5f5` (neutro) sobre `#000000`. Os CTAs principais puxam
+para o quente num site frio/neutro. O botão também traz `--ic-chart-1..5` e
+`--ic-destructive`, que nada no projeto usa.
+
+### 4.2 Dois sistemas de botão
+
+`globals.css` define `.btn-primary` e `.btn-ghost`; existe também o
+`OriginButton`. `.btn-primary` **não é usado em lugar nenhum** (código morto);
+`.btn-ghost` aparece só em `ProjectsSection.tsx:114`, enquanto todos os outros
+CTAs usam `OriginButton`. Resultado: o "Ver todos no GitHub" é visualmente de
+outra família que o "Ver projetos" logo acima. Regra `consistency`.
+
+### 4.3 Hex cru dentro de componentes
+
+`text-[#cacaca]` repetido em `HeroSection.tsx:169`, `AboutSection.tsx:33` e
+`CareerSection.tsx:58` — é o token "texto de corpo secundário", que não existe
+na config. Idem `#1c1c1c`/`#121212`/`#000000` em `parallax-scene.tsx:97,109,137`
+e as cores de sintaxe (`.c-keyword`, `.c-var`, …) em `globals.css`.
+
+### 4.4 Configuração morta
+
+- `darkMode: ["class"]` (`tailwind.config.js:3`) — **zero** ocorrências de
+  `dark:` ou de troca de classe no projeto. O site é dark-only.
+- `theme.container` (linhas 10-16: center, padding 1.25rem, 1200px) — **zero**
+  usos de `className="container"`. Todas as seções usam `px-[5%]` + `max-w-*`.
+
+---
+
+## 5. Layout e Responsivo (ALTO)
+
+### 5.1 O hero é mais largo que todas as outras seções — `container-width`
+
+- `HeroSection.tsx:155` → `max-w-6xl` (1152px)
+- `AboutSection.tsx:22`, `ProjectsSection.tsx:55`, `CareerSection.tsx:26` → `max-w-5xl` (1024px)
+
+Em telas ≥1152px a margem esquerda do hero não alinha com a das seções
+seguintes — um degrau de 64px por lado, visível ao rolar.
+
+### 5.2 Gutter percentual em vez da escala de espaçamento — `spacing-scale`
+
+`px-[5%]` em 7 arquivos. Percentual significa gutter que cresce indefinidamente
+com a viewport (5% de 2560px = 128px) e encolhe no mobile (18px em 375px), sem
+relação com a grade de 4/8px. É o papel do `theme.container`, que está
+configurado e ignorado (§4.4).
+
+### 5.3 Sem escala tipográfica — `font-scale`
+
+11 tamanhos arbitrários distintos, nenhum derivado de escala: `0.78rem`,
+`0.8rem`, `0.82rem`, `0.83rem`, `0.85rem`, `0.88rem`, `0.95rem`, `1.05rem`,
+`15px`, e dois `clamp()`. O plugin pede escala consistente (ex.:
+12/14/16/18/24/32). A descrição do repositório em `ProjectsSection.tsx:87` fica
+em `0.85rem` = **13.6px** de texto corrido, abaixo do recomendado
+(`readable-font-size`).
+
+### 5.4 `overflow-x: hidden` no `html`
+
+`globals.css` aplica `overflow-x: hidden` em `html`. Isso mascara overflow em
+vez de corrigir a origem e, em alguns engines, cria um contexto de scroll que
+quebra `position: sticky` em descendentes — exatamente a técnica de que a
+`ParallaxScene` depende (`sticky top-0`). Funciona hoje; é frágil.
+
+---
+
+## 6. Tipografia e Cor (MÉDIO)
+
+**O contraste de texto está bom** — vale registrar, porque é o erro mais comum
+em tema escuro e aqui não existe:
+
+| Par | Ratio | WCAG AA |
+|---|---|---|
+| `#cacaca` sobre `#000000` | 12.81:1 | ✅ |
+| `muted #a1a1aa` sobre `bg2 #141414` | 7.19:1 | ✅ |
+| `accent #d4d4d8` sobre `#000000` | 14.21:1 | ✅ |
+
+O único par que falha é de **componente**, não de texto: a borda
+`rgba(255,255,255,0.12)` sobre `#000000` dá **1.27:1**, abaixo do 3:1 que o WCAG
+1.4.11 pede para limites de UI. Os cards praticamente não têm contorno
+perceptível no fundo preto — o que empurra a hierarquia para a sombra, que no
+preto também não aparece. Vale subir para ~0.20 nas bordas que carregam
+estrutura (cards, inputs) e manter 0.12 nos divisores decorativos.
+
+`line-height: 1.7` no body ✅ (regra pede 1.5–1.75).
+
+---
+
+## 7. Formulários e Feedback (MÉDIO)
+
+### 7.1 Estado de erro sem recuperação — `error-recovery`, `error-clarity`
+
+`ProjectsSection.tsx:66-70` mostra "Erro ao carregar repositórios." e para aí:
+sem causa, sem botão de tentar de novo, sem link alternativo. Dado o rate limit
+de 60 req/h do §3.2, é um caminho que visitantes reais vão encontrar.
+
+### 7.2 Nenhum estado vazio — `empty-states`
+
+Se a API devolver `[]` (conta sem repos públicos, filtro futuro), cai em
+`loading=false`, `error=false`, `repos=[]` → a grade renderiza **nada**, sem
+explicação. Só sobra o botão do footer da seção.
+
+### 7.3 Sem contato real — recomendação do pattern
+
+O plugin coloca "Contato" como quarta seção do Portfolio Grid, com CTA no
+footer. Hoje todo contato é `mailto:nycolas.tec@gmail.com` (4 ocorrências) e o
+footer não tem CTA nenhum. `mailto:` falha silenciosamente para quem usa webmail
+sem handler registrado.
+
+---
+
+## 8. Navegação (ALTO)
+
+### 8.1 Sem indicação de seção atual — `nav-state-active`
+
+Os três links (`#sobre`, `#projetos`, `#carreira`) nunca mudam de estado. Numa
+one-page longa com parallax, o visitante não tem referência de onde está. Falta
+scroll-spy + `aria-current="location"`. É a lacuna de navegação mais visível.
+
+### 8.2 O offset da navbar só existe no caminho do Lenis
+
+`smooth-scroll.tsx:215-252` intercepta **todo** clique em `a[href^="#"]` com
+`preventDefault()` e delega ao Lenis. Com `prefers-reduced-motion` ativo o
+`SmoothScroll` retorna antes (linha 194) e cai no `scroll-behavior: smooth`
+nativo ✅. Mas o `NAV_OFFSET = -72` que compensa a navbar fixa **só existe no
+caminho do Lenis** — com motion reduzido, ou antes da hidratação, o alvo para
+atrás da navbar de 64px. Correção: `scroll-margin-top` nas `<section>`, que
+funciona nos dois caminhos.
+
+---
+
+## Prioridade sugerida
+
+| # | Ação | Arquivo | Esforço | Status |
+|---|---|---|---|---|
+| 1 | Anel de foco visível nos botões (§1.1) | `ui/origin-button.tsx:237` | baixo | ✅ feito |
+| 2 | Alvos de toque ≥44px (§2.1) | `Footer.tsx`, `HeroSection.tsx:192`, `Navbar.tsx:53,62,92,100` | baixo | ✅ feito |
+| 3 | `next/font` e remover o `@import` duplicado (§3.1) | `layout.tsx`, `globals.css:1`, `tailwind.config.js` | baixo | ✅ feito |
+| 4 | Repos via Server Component com `revalidate` (§3.2) | `ProjectsSection.tsx` | médio | — |
+| 5 | `reduced-motion` no `Reveal` e no typewriter (§1.2) | `ui/reveal.tsx`, `HeroSection.tsx` | baixo |
+| 6 | Card de projeto clicável inteiro (§2.2) | `ProjectsSection.tsx:74` | baixo |
+| 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx` | baixo |
+| 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | todas as seções | baixo |
+| 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js` | médio |
+| 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css` | médio |
+| 11 | Estado vazio + retry nos projetos (§7.1, §7.2) | `ProjectsSection.tsx` | baixo |
+| 12 | Scroll-spy na navbar + `scroll-margin-top` (§8.1, §8.2) | `Navbar.tsx`, `globals.css` | médio |
+
+## Fora do escopo do plugin, mas adjacente
+
+- **Sem `public/`**: nenhum favicon, nenhum ícone, nenhuma imagem OG. O
+  `metadata.openGraph` em `layout.tsx:9-16` não tem `images` nem `metadataBase`
+  — compartilhar o link no LinkedIn/WhatsApp gera um card sem imagem. Falta
+  `icons`, `twitter`, `robots` e `canonical`.
+- **Estrutura de pastas**: o app está em `C:\BLOG\meublog-next\meublog-next\`
+  (duplicado), e o git mostra os arquivos do nível de cima como deletados — um
+  commit não terminado. Vale resolver antes de mexer no código.
+- `&copy; 2026` fixo em `Footer.tsx:8` — usar `new Date().getFullYear()`.

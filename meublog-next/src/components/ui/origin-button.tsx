@@ -234,7 +234,13 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
           // circular fill finish transitioning together instead of the text
           // flipping color before the fill has visually caught up.
           "transition-[color] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-background)]",
+          // O foco fica por conta do :focus-visible global (globals.css), que
+          // desenha o outline 3px fora do botão — então ele contrasta com o
+          // fundo da página, não com o preenchimento do botão. O ring que
+          // havia aqui usava --ic-ring a 16-18% de opacidade: media 1,41:1 na
+          // variante light e 1,70:1 na dark, abaixo do 3:1 que o WCAG pede
+          // para indicador de foco. O ring-offset também apontava para
+          // --color-background (#111111), que não é o fundo real da página.
           "disabled:pointer-events-none disabled:opacity-50",
           href && isDisabled && "pointer-events-none opacity-50",
           showFill &&

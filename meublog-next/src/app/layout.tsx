@@ -1,6 +1,32 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import { SmoothScroll } from "@/components/ui/smooth-scroll";
 import "./globals.css";
+
+/**
+ * Fontes servidas pelo próprio domínio, via next/font.
+ *
+ * Antes a mesma folha do Google Fonts era pedida duas vezes: um @import no
+ * topo do globals.css — que bloqueia o render e só é descoberto depois de
+ * baixar e parsear o CSS do Tailwind — e um <link> aqui no <head>. Agora os
+ * arquivos entram no build, com font-display: swap e preload do subset já
+ * aplicados, e nenhuma requisição sai para fora. Os dois preconnect deixaram
+ * de ter função e saíram junto.
+ *
+ * Inter e JetBrains Mono são variable fonts: não se declara `weight`, todos
+ * os pesos usados no site vêm do mesmo arquivo.
+ */
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Nycolas Fernandes | Desenvolvedor",
@@ -21,15 +47,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-br">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="pt-br" className={`${inter.variable} ${jetbrainsMono.variable}`}>
       <body>
         <SmoothScroll />
         {children}

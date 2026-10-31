@@ -189,7 +189,7 @@ export default function HeroSection() {
                 target="_blank"
                 rel="noreferrer"
                 aria-label={s.label}
-                className="flex h-10 w-10 items-center justify-center rounded-[10px] border border-border bg-bg3 text-muted transition-all duration-200 hover:border-accent2/40 hover:bg-accent/10 hover:text-accent2"
+                className="flex h-11 w-11 items-center justify-center rounded-[10px] border border-border bg-bg3 text-muted transition-all duration-200 hover:border-accent2/40 hover:bg-accent/10 hover:text-accent2"
               >
                 <s.icon size={17} />
               </a>
