@@ -30,6 +30,35 @@ module.exports = {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "monospace"],
       },
+      // Escala tipográfica única, no lugar dos 11 tamanhos arbitrários que
+      // existiam espalhados pelo JSX (0.78 / 0.8 / 0.82 / 0.83 / 0.85 / 0.88
+      // / 0.95 / 1.05rem, 15px e dois clamp), nenhum derivado de escala.
+      //
+      // Os passos de 12 a 36px batem com os padrões do Tailwind; o que muda
+      // aqui é a entrelinha. Os passos de corpo (sm, base, lg) carregam ~1.7,
+      // que é o line-height do body e o que esses textos já herdavam quando o
+      // tamanho vinha de `text-[...]` — os padrões do Tailwind os apertariam
+      // para ~1.4, o que seria uma regressão de legibilidade disfarçada de
+      // refatoração.
+      fontSize: {
+        xs: ["0.75rem", { lineHeight: "1.5" }],
+        sm: ["0.875rem", { lineHeight: "1.7" }],
+        base: ["1rem", { lineHeight: "1.7" }],
+        lg: ["1.125rem", { lineHeight: "1.6" }],
+        xl: ["1.25rem", { lineHeight: "1.5" }],
+        "2xl": ["1.5rem", { lineHeight: "1.3" }],
+        "3xl": ["1.875rem", { lineHeight: "1.2" }],
+        "4xl": ["2.25rem", { lineHeight: "1.15" }],
+        // Os dois títulos fluidos. Estavam como `text-[clamp(...)]` +
+        // `leading-[...]` escritos à mão no JSX.
+        // O teto caiu de 3.8rem para 3.5rem. Com o container do item 8 a
+        // coluna de texto do hero passou a ter 548px, e "Nycolas Fernandes"
+        // a 60,8px pede 553px — quebrava em três linhas, desfazendo a
+        // composição de duas que o <br/> do HeroSection declara. A 56px pede
+        // 508px e sobra folga.
+        display: ["clamp(2.2rem, 5vw, 3.5rem)", { lineHeight: "1.12" }],
+        "display-lg": ["clamp(2rem, 6vw, 4.2rem)", { lineHeight: "1.08" }],
+      },
       colors: {
         bg: "#000000",
         bg2: "#141414",
@@ -39,9 +68,23 @@ module.exports = {
         accent2: "#f4f4f5",
         muted: "#a1a1aa",
         "text-main": "#f5f5f5",
+        // O "corpo secundário": era `text-[#cacaca]` repetido no hero, no
+        // sobre e na carreira. Fica entre o text-main (#f5f5f5) e o muted
+        // (#a1a1aa) — 12,81:1 sobre o preto.
+        "text-soft": "#cacaca",
         green: "#4ade80",
         red: "#f87171",
         yellow: "#fbbf24",
+        // Paleta do bloco de código do hero. É uma paleta à parte de
+        // propósito (realce de sintaxe não é cor de interface), mas vinha
+        // como hex cru dentro do globals.css.
+        syntax: {
+          keyword: "#e4e4e7",
+          var: "#93c5fd",
+          prop: "#f472b6",
+          str: "#86efac",
+          bool: "#fcd34d",
+        },
       },
       borderRadius: {
         DEFAULT: "12px",

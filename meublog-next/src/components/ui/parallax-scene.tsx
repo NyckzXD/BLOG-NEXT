@@ -94,8 +94,7 @@ export function ParallaxScene({ className }: { className?: string }) {
             ))}
             <Ridge
               d="M0 200 L0 96 L90 132 L180 70 L268 118 L360 44 L452 108 L548 62 L640 120 L742 58 L840 116 L940 74 L1046 126 L1142 84 L1244 130 L1348 92 L1440 134 L1440 200 Z"
-              fill="#1c1c1c"
-              stroke="rgba(255,255,255,0.14)"
+              className="fill-bg3 stroke-border"
             />
           </div>
 
@@ -106,8 +105,7 @@ export function ParallaxScene({ className }: { className?: string }) {
           >
             <Ridge
               d="M0 200 L0 128 L120 150 L240 110 L370 148 L500 104 L640 152 L780 116 L920 158 L1060 122 L1200 160 L1330 130 L1440 156 L1440 200 Z"
-              fill="#121212"
-              stroke="rgba(255,255,255,0.10)"
+              className="fill-bg2 stroke-border"
             />
           </div>
 
@@ -117,12 +115,12 @@ export function ParallaxScene({ className }: { className?: string }) {
             className="absolute inset-0 flex flex-col items-center justify-center px-5 text-center will-change-transform"
           >
             <p className="eyebrow mb-4">// em construção</p>
-            <h2 className="max-w-3xl text-[clamp(2rem,6vw,4.2rem)] font-extrabold leading-[1.08] tracking-tight text-white">
+            <h2 className="max-w-3xl text-display-lg font-extrabold tracking-tight text-white">
               Do primeiro <span className="accent-text">commit</span>
               <br />
               ao próximo projeto
             </h2>
-            <p className="mt-5 max-w-md text-[15px] text-muted">
+            <p className="mt-5 max-w-md text-base text-muted">
               Cada linha de código é um passo a mais na jornada.
             </p>
           </div>
@@ -134,8 +132,7 @@ export function ParallaxScene({ className }: { className?: string }) {
           >
             <Ridge
               d="M0 200 L0 158 L160 172 L320 150 L500 178 L680 152 L860 180 L1040 158 L1220 182 L1440 162 L1440 200 Z"
-              fill="#000000"
-              stroke="rgba(255,255,255,0.16)"
+              className="fill-bg stroke-border"
             />
           </div>
         </div>
@@ -147,15 +144,15 @@ export function ParallaxScene({ className }: { className?: string }) {
   );
 }
 
-function Ridge({
-  d,
-  fill,
-  stroke,
-}: {
-  d: string;
-  fill: string;
-  stroke: string;
-}) {
+/**
+ * As três serras vinham com hex cru nas props (`#1c1c1c`, `#121212`,
+ * `#000000`) e três alfas de branco diferentes no traço (0.14 / 0.10 / 0.16).
+ * A rampa de profundidade que elas desenham é a mesma do fundo da interface,
+ * então passaram a usar os tokens: bg3 atrás, bg2 no meio, bg na frente, e o
+ * token `border` nos três traços. As diferenças são de 1 a 5 pontos de hex,
+ * imperceptíveis na tela, e saem cinco valores fora da paleta.
+ */
+function Ridge({ d, className }: { d: string; className: string }) {
   return (
     <svg
       viewBox="0 0 1440 200"
@@ -163,7 +160,7 @@ function Ridge({
       aria-hidden="true"
       className="absolute inset-0 h-full w-full"
     >
-      <path d={d} fill={fill} stroke={stroke} strokeWidth={1.5} />
+      <path d={d} strokeWidth={1.5} className={className} />
     </svg>
   );
 }

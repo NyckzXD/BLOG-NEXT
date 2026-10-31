@@ -46,7 +46,7 @@ export default function CareerSection() {
                   <h3 className="text-base font-semibold text-accent2">
                     {card.title}
                   </h3>
-                  <div className="font-mono text-[0.83rem] text-muted">
+                  <div className="font-mono text-sm text-muted">
                     {card.dates}
                   </div>
                 </div>
@@ -60,7 +60,7 @@ export default function CareerSection() {
             {SKILLS_LIST.map((item, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2.5 text-[0.95rem] text-[#cacaca]"
+                className="flex items-start gap-2.5 text-base text-text-soft"
               >
                 <Sparkles size={15} className="mt-1 flex-none text-accent" />
                 {item}

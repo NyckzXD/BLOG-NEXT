@@ -23,7 +23,7 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1 a 8** da tabela de prioridade foram aplicados em 31/10/2026
+Os itens **1 a 9** da tabela de prioridade foram aplicados em 31/10/2026
 e verificados no navegador (`npx next build` passa; medições abaixo em cada
 seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
 componente. Os demais seguem em aberto.
@@ -390,12 +390,37 @@ para o quente num site frio/neutro. O botão também traz `--ic-chart-1..5` e
 CTAs usam `OriginButton`. Resultado: o "Ver todos no GitHub" é visualmente de
 outra família que o "Ver projetos" logo acima. Regra `consistency`.
 
-### 4.3 Hex cru dentro de componentes
+### 4.3 ✅ CORRIGIDO — Hex cru dentro de componentes
 
-`text-[#cacaca]` repetido em `HeroSection.tsx:169`, `AboutSection.tsx:33` e
-`CareerSection.tsx:58` — é o token "texto de corpo secundário", que não existe
-na config. Idem `#1c1c1c`/`#121212`/`#000000` em `parallax-scene.tsx:97,109,137`
-e as cores de sintaxe (`.c-keyword`, `.c-var`, …) em `globals.css`.
+`text-[#cacaca]` repetido em `HeroSection.tsx`, `AboutSection.tsx` e
+`CareerSection.tsx` — é o token "texto de corpo secundário", que não existia
+na config. Idem `#1c1c1c`/`#121212`/`#000000` em `parallax-scene.tsx` e as
+cores de sintaxe (`.c-keyword`, `.c-var`, …) em `globals.css`.
+
+**Aplicado:**
+
+- `#cacaca` virou o token **`text-soft`**, entre o `text-main` (#f5f5f5) e o
+  `muted` (#a1a1aa). Os três usos agora são `text-text-soft`.
+- As três serras da `ParallaxScene` passaram a usar a rampa de fundo que já
+  existia: `fill-bg3` atrás, `fill-bg2` no meio, `fill-bg` na frente. Os três
+  traços, que tinham alfas de branco diferentes (0,14 / 0,10 / 0,16), viraram
+  o token `border`. As diferenças são de 1 a 5 pontos de hex — saem cinco
+  valores fora da paleta sem mudança perceptível. O `Ridge` deixou de receber
+  `fill`/`stroke` como string e passou a receber `className`.
+- As cinco cores de sintaxe viraram um grupo `syntax` na config
+  (`keyword`, `var`, `prop`, `str`, `bool`), lidas no `globals.css` via
+  `theme('colors.syntax.*')` — o mesmo idioma que o arquivo já usava para
+  `theme('colors.accent')`. Continuam uma paleta à parte de propósito: realce
+  de sintaxe não é cor de interface.
+
+Verificado no navegador: as serras computam `rgb(33,33,33)`, `rgb(20,20,20)` e
+`rgb(0,0,0)` com traço `rgba(255,255,255,0.12)`; as cinco cores de sintaxe
+seguem idênticas; `text-soft` resolve para `rgb(202,202,202)`.
+
+**Ficou de fora:** os `rgba(244,244,245, …)` do brilho do horizonte e do halo
+das estrelas, em `parallax-scene.tsx`. São o `accent2` com alfa dentro de um
+`radial-gradient` e de um `box-shadow` arbitrários — mexer neles é reescrever
+os dois efeitos, não trocar um token.
 
 ### 4.4 Configuração morta
 
@@ -474,14 +499,54 @@ e as bordas continuam sangrando, só o conteúdo é que fica contido.
 Em 375px: gutter de 20px dos dois lados, conteúdo de 335px e
 `scrollWidth === innerWidth === 375` — sem scroll horizontal.
 
-### 5.3 Sem escala tipográfica — `font-scale`
+### 5.3 ✅ CORRIGIDO — Sem escala tipográfica — `font-scale`
 
 11 tamanhos arbitrários distintos, nenhum derivado de escala: `0.78rem`,
 `0.8rem`, `0.82rem`, `0.83rem`, `0.85rem`, `0.88rem`, `0.95rem`, `1.05rem`,
 `15px`, e dois `clamp()`. O plugin pede escala consistente (ex.:
-12/14/16/18/24/32). A descrição do repositório em `ProjectsSection.tsx:87` fica
-em `0.85rem` = **13.6px** de texto corrido, abaixo do recomendado
-(`readable-font-size`).
+12/14/16/18/24/32). A descrição do repositório ficava em `0.85rem` = **13,6px**
+de texto corrido, abaixo do recomendado (`readable-font-size`).
+
+**Aplicado:** `theme.fontSize` passou a declarar a escala do projeto, e os
+nove valores arbitrários de corpo colapsaram em quatro passos:
+
+| Antes | Depois |
+|---|---|
+| 0,78rem (12,48px), 0,8rem (12,8px) | `text-xs` — 12px |
+| 0,82rem (13,12px), 0,83rem (13,28px), 0,85rem (13,6px), 0,88rem (14,08px) | `text-sm` — 14px |
+| 0,95rem (15,2px), 15px | `text-base` — 16px |
+| 1,05rem (16,8px) | `text-lg` — 18px |
+| `clamp(2.2rem,5vw,3.8rem)` + `leading-[1.12]` | `text-display` |
+| `clamp(2rem,6vw,4.2rem)` + `leading-[1.08]` | `text-display-lg` |
+
+Medido depois, em 1280px, a página inteira usa **sete** tamanhos: 12, 14, 16,
+18, 36, 56 e 67,2px — os quatro passos de corpo, o `4xl` dos títulos de seção
+e os dois fluidos. A descrição do repositório subiu para 14px, resolvendo o
+`readable-font-size`.
+
+**A entrelinha foi a parte delicada.** Os passos do Tailwind vêm com
+line-height embutido (`text-sm` = 1,25rem, ou ~1,43). Mas esses textos não
+declaravam entrelinha nenhuma: herdavam o **1,7** do body. Trocar
+`text-[0.85rem]` por `text-sm` puro teria apertado o corpo de 1,7 para 1,43 —
+uma regressão de legibilidade disfarçada de refatoração, justo no item que o
+§6 elogiava. Por isso a escala declara entrelinha explícita: 1,7 nos passos de
+corpo (`sm`, `base`), 1,6 no `lg`, e valores progressivamente menores nos
+títulos.
+
+**Uma regressão do item 8 que apareceu aqui.** Com o container, a coluna de
+texto do hero passou a ter 548px. O `h1` a 60,8px pede 553px para "Nycolas
+Fernandes", então quebrava em **três** linhas — desfazendo a composição de
+duas que o `<br/>` do `HeroSection` declara explicitamente. Não dava para ver
+nos números do item 8; só apareceu ao olhar o hero de novo. O teto do
+`text-display` caiu de 3.8rem para **3.5rem** (56px, que pede 508px), e as
+duas linhas voltaram. Em 375px o piso do clamp não mudou.
+
+**Também saiu daqui:** o `text-[0.82rem]` do skip link, que eu mesmo
+introduzi no item 7, virou `text-sm`.
+
+**Ficou de propósito:** o `leading-[1.9]` do bloco de código do hero. É
+entrelinha, não tamanho, e 1,9 num bloco de código é escolha deliberada — a
+escala não deve sobrescrevê-la.
 
 ### 5.4 `overflow-x: hidden` no `html`
 
@@ -582,7 +647,7 @@ funciona nos dois caminhos.
 | 6 | Card de projeto clicável inteiro (§2.2, §2.2b) | `ProjectsSection.tsx`, `globals.css` | baixo | ✅ feito |
 | 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx`, `page.tsx`, `ui/section-heading.tsx`, `ui/smooth-scroll.tsx`, `globals.css` | baixo | ✅ feito |
 | 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | `tailwind.config.js`, todas as seções, `Navbar.tsx`, `Footer.tsx`, `ui/parallax-scene.tsx` | baixo | ✅ feito |
-| 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js` | médio | — |
+| 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js`, todos os componentes, `globals.css` | médio | ✅ feito |
 | 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css` | médio | — |
 | 11 | Estado vazio + recuperação nos projetos (§7.1, §7.2) | `ProjectsSection.tsx` | baixo | ✅ saiu junto com o 4 |
 | 12 | Scroll-spy na navbar + `scroll-margin-top` (§8.1, §8.2) | `Navbar.tsx`, `globals.css` | médio | — |

@@ -2,7 +2,7 @@ import { Heart, Github } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border py-8 text-[0.85rem] text-muted">
+    <footer className="border-t border-border py-8 text-sm text-muted">
       {/* A borda do topo sangra; o conteúdo segue o container das seções. */}
       <div className="container flex flex-col flex-wrap items-center justify-between gap-3 sm:flex-row">
         <p className="flex items-center gap-1.5 text-center">

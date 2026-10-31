@@ -45,7 +45,7 @@ export default function Navbar() {
           segue o mesmo container das seções — senão o logo não alinha com o
           título da seção logo abaixo. */}
       <div className="container flex h-full items-center justify-between">
-        <a href="#" className="font-mono text-[1.05rem] font-medium tracking-tight text-white">
+        <a href="#" className="font-mono text-lg font-medium tracking-tight text-white">
           nycolas<span className="text-accent">.</span>dev
         </a>
 
@@ -54,7 +54,7 @@ export default function Navbar() {
             <a
               key={link.href}
               href={link.href}
-              className="inline-flex h-11 items-center rounded-md px-3.5 font-mono text-[0.82rem] text-muted transition-colors duration-200 hover:bg-bg3 hover:text-text-main"
+              className="inline-flex h-11 items-center rounded-md px-3.5 font-mono text-sm text-muted transition-colors duration-200 hover:bg-bg3 hover:text-text-main"
             >
               {link.label}
             </a>

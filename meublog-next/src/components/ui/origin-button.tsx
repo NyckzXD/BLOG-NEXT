@@ -225,7 +225,7 @@ const OriginButton = React.forwardRef<HTMLButtonElement, OriginButtonProps>(
         className={cn(
           colorMapClassName,
           isLight ? lightThemeClassName : darkThemeClassName,
-          "relative inline-flex h-12 cursor-pointer touch-manipulation select-none items-center justify-center overflow-hidden rounded-xl px-8 font-medium text-[15px] tracking-[-0.02em]",
+          "relative inline-flex h-12 cursor-pointer touch-manipulation select-none items-center justify-center overflow-hidden rounded-xl px-8 font-medium text-base tracking-[-0.02em]",
           "border-[0.5px] border-[var(--color-border)]",
           isLight
             ? "bg-[var(--color-card)] text-[var(--color-card-foreground)]"

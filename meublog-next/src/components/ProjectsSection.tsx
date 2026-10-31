@@ -104,7 +104,7 @@ export default async function ProjectsSection() {
                     O Tailwind já zera tamanho e peso dos headings no
                     preflight, então o visual não muda.
                   */}
-                  <h3 className="flex items-center gap-2 text-[0.95rem] font-semibold text-accent2">
+                  <h3 className="flex items-center gap-2 text-base font-semibold text-accent2">
                     <BookOpen size={15} className="text-muted" />
                     {/*
                       Stretched link: o ::after cobre o card inteiro, então
@@ -127,10 +127,10 @@ export default async function ProjectsSection() {
                     </a>
                     <ArrowUpRight size={13} className="ml-auto flex-none text-muted" />
                   </h3>
-                  <p className="flex-1 text-[0.85rem] leading-relaxed text-muted">
+                  <p className="flex-1 text-sm text-muted">
                     {repo.description || "Sem descrição"}
                   </p>
-                  <div className="flex gap-4 font-mono text-[0.8rem] text-muted">
+                  <div className="flex gap-4 font-mono text-xs text-muted">
                     <span className="flex items-center gap-1.5">
                       <Star size={13} /> {repo.stargazers_count}
                     </span>
