@@ -92,8 +92,8 @@ module.exports = {
       },
       boxShadow: {
         card: "0 4px 24px rgba(0,0,0,0.5)",
-        glow: "0 0 40px rgba(212,212,216,0.18)",
-        "glow-lg": "0 0 80px rgba(212,212,216,0.14)",
+        // `glow` e `glow-lg` saíram junto com o `.btn-primary`, que era o
+        // único consumidor dos dois — e era código morto (§4.2).
       },
       keyframes: {
         "fade-up": {

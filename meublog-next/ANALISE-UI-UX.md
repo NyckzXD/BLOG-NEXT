@@ -23,7 +23,7 @@ execução, não de direção.
 
 ## Status
 
-Os itens **1 a 9** da tabela de prioridade foram aplicados em 31/10/2026
+Os itens **1 a 10** da tabela de prioridade foram aplicados em 31/10/2026
 e verificados no navegador (`npx next build` passa; medições abaixo em cada
 seção). O item 4 resolveu junto o **11** (§7.1 e §7.2), que dependia do mesmo
 componente. Os demais seguem em aberto.
@@ -257,10 +257,10 @@ estado base e `translateY(-4px)` no hover/foco — valores diretos interpolam
 normalmente. Confirmado depois: `0 → -3.5 → -4px` ao longo da transição, e o
 topo do card sobe de 260,7 para 256,7.
 
-**Ainda em aberto:** `.career-card:hover` e `.btn-ghost:hover` seguem com o
-padrão antigo baseado em variáveis, então o deslocamento deles também não
-renderiza. `.btn-primary` tem o mesmo problema, mas é código morto (§4.2).
-Ficaram de fora por pertencerem a outros itens da fila.
+**Ainda em aberto:** `.career-card:hover` segue com o padrão antigo baseado em
+variáveis, então o deslocamento dele também não renderiza. (`.btn-ghost` e
+`.btn-primary` tinham o mesmo problema; os dois deixaram de existir no
+item 10.)
 
 ### 2.3 Feedback só no hover
 
@@ -368,27 +368,72 @@ em vez de em loop.
 
 ## 4. Estilo e Consistência (ALTO)
 
-### 4.1 Dois sistemas de token que não se falam — `color-semantic`, `elevation-consistent`
+### 4.1 ✅ CORRIGIDO — Dois sistemas de token que não se falam — `color-semantic`, `elevation-consistent`
 
-Coexistem no projeto:
+Coexistiam no projeto:
 
 1. Tokens do Tailwind (`tailwind.config.js`): `bg`, `bg2`, `bg3`, `accent`,
    `accent2`, `muted`, `text-main`.
-2. Os ~46 CSS vars `--ic-*`/`--color-*` embutidos em `origin-button.tsx:12-19`,
+2. Os ~46 CSS vars `--ic-*`/`--color-*` embutidos em `origin-button.tsx`,
    com paleta própria.
 
-E as paletas **divergem**: o botão usa `#f6f3ec` (creme quente) e `#111111`,
-enquanto o site usa `#f5f5f5` (neutro) sobre `#000000`. Os CTAs principais puxam
-para o quente num site frio/neutro. O botão também traz `--ic-chart-1..5` e
-`--ic-destructive`, que nada no projeto usa.
+E as paletas **divergiam**: o botão usava `#f6f3ec` (creme quente) e `#111111`,
+enquanto o site usa `#f5f5f5` (neutro) sobre `#000000`. Os CTAs principais
+puxavam para o quente num site frio/neutro. O botão também trazia
+`--ic-chart-1..5` e `--ic-destructive`, que nada no projeto usava.
 
-### 4.2 Dois sistemas de botão
+**Aplicado:** as três cadeias gigantes de classe saíram — a de mapeamento
+(`--ic-*` → `--color-*`) e as duas de tema. **Das 46 variáveis, o componente
+lia sete**; o resto era inventário do kit de origem (`--ic-chart-1..5`,
+`--ic-brand`, `--ic-paper`, `--ic-popover-foreground`, `--ic-destructive`,
+`--ic-shadow-soft`, `--ic-surface-border`…). O `--ic-ring` já tinha ficado
+órfão quando o anel de foco saiu no item 1.
 
-`globals.css` define `.btn-primary` e `.btn-ghost`; existe também o
-`OriginButton`. `.btn-primary` **não é usado em lugar nenhum** (código morto);
-`.btn-ghost` aparece só em `ProjectsSection.tsx:114`, enquanto todos os outros
-CTAs usam `OriginButton`. Resultado: o "Ver todos no GitHub" é visualmente de
+No lugar, duas listas curtas com os tokens do próprio site — sem camada de
+variável no meio, porque não havia reuso que justificasse a indireção:
+
+| | Antes | Depois |
+|---|---|---|
+| **light** fundo / texto / borda | `#ffffff` / `#111111` / `#e3e7ec` | `accent2` / `bg` / `accent` |
+| **dark** fundo / texto / borda | `#171716` / `#f6f3ec` / `#2b2a25` | `bg3` / `text-main` / `border` |
+| preenchimento do hover | `--color-foreground` / `bg-neutral-50` | `bg` / `accent2` |
+| texto sobre o preenchimento | `--color-background` / `text-neutral-950` | `accent2` / `bg` |
+
+As duas últimas linhas eram um detalhe à parte: a variante escura nem usava a
+paleta do botão ali, usava `neutral-50`/`neutral-950` do Tailwind padrão.
+
+Verificado no navegador, nos cinco CTAs da página: light computa
+`rgb(244,244,245)` sobre texto `rgb(0,0,0)`; dark, `rgb(33,33,33)` com texto
+`rgb(245,245,245)` e borda `rgba(255,255,255,0.12)`. O preenchimento circular
+do hover continua funcionando nas duas variantes (medido: light pinta
+`rgb(0,0,0)` e o texto vira `rgb(244,244,245)`; dark faz o inverso), e o anel
+de foco do item 1 segue em `rgb(212,212,216)`, 2px, offset 3px.
+
+A variante escura ficou um pouco mais clara que antes (`#212121` contra
+`#171716`): é o `bg3`, o token de superfície elevada que a `.skill-tag` e o
+hover da navbar já usavam. Contraste do texto sobre ela: **14,6:1**.
+
+### 4.2 ✅ CORRIGIDO — Dois sistemas de botão
+
+`globals.css` definia `.btn-primary` e `.btn-ghost`; existe também o
+`OriginButton`. `.btn-primary` **não era usado em lugar nenhum** (código
+morto); `.btn-ghost` aparecia só uma vez, no "Ver todos no GitHub", enquanto
+todos os outros CTAs usavam `OriginButton` — o botão ficava visualmente de
 outra família que o "Ver projetos" logo acima. Regra `consistency`.
+
+**Aplicado:** os dois saíram do `globals.css` e o "Ver todos no GitHub" virou
+`OriginButton variant="dark"`. Agora os cinco CTAs da página vêm do mesmo
+componente.
+
+Dois efeitos colaterais:
+
+- `shadow-glow` e `shadow-glow-lg` saíram do `tailwind.config.js`. O
+  `.btn-primary` era o único consumidor dos dois — e era código morto.
+- O `-translate-y-0.5` que os dois tinham no hover nunca renderizava, pelo
+  mesmo motivo do §2.2b. Some com eles.
+
+O bundle da rota caiu de **52,3 kB para 51,6 kB**: as cadeias de classe do
+botão eram string no bundle do cliente.
 
 ### 4.3 ✅ CORRIGIDO — Hex cru dentro de componentes
 
@@ -648,7 +693,7 @@ funciona nos dois caminhos.
 | 7 | Títulos de card como `h3` + skip link (§1.3, §1.4) | cards, `layout.tsx`, `page.tsx`, `ui/section-heading.tsx`, `ui/smooth-scroll.tsx`, `globals.css` | baixo | ✅ feito |
 | 8 | Unificar `max-w` e trocar `px-[5%]` pelo `container` (§5.1, §5.2) | `tailwind.config.js`, todas as seções, `Navbar.tsx`, `Footer.tsx`, `ui/parallax-scene.tsx` | baixo | ✅ feito |
 | 9 | Escala tipográfica + token para `#cacaca` (§4.3, §5.3) | `tailwind.config.js`, todos os componentes, `globals.css` | médio | ✅ feito |
-| 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css` | médio | — |
+| 10 | Alinhar a paleta do `OriginButton` e remover `.btn-*` mortos (§4.1, §4.2) | `ui/origin-button.tsx`, `globals.css`, `ProjectsSection.tsx`, `tailwind.config.js` | médio | ✅ feito |
 | 11 | Estado vazio + recuperação nos projetos (§7.1, §7.2) | `ProjectsSection.tsx` | baixo | ✅ saiu junto com o 4 |
 | 12 | Scroll-spy na navbar + `scroll-margin-top` (§8.1, §8.2) | `Navbar.tsx`, `globals.css` | médio | — |
 

@@ -1,4 +1,5 @@
 import { BookOpen, Star, GitFork, ArrowRight, ArrowUpRight } from "lucide-react";
+import { OriginButton } from "@/components/ui/origin-button";
 import { Reveal } from "@/components/ui/reveal";
 import { SectionHeading } from "@/components/ui/section-heading";
 
@@ -150,15 +151,12 @@ export default async function ProjectsSection() {
           </div>
         )}
 
+        {/* Era o único `.btn-ghost` do projeto, de outra família visual que o
+            "Ver projetos" e o "Entrar em contato" logo acima e abaixo. */}
         <div className="text-center">
-          <a
-            href={PROFILE_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="btn-ghost"
-          >
+          <OriginButton variant="dark" href={PROFILE_URL} target="_blank" rel="noreferrer">
             Ver todos no GitHub <ArrowRight size={16} />
-          </a>
+          </OriginButton>
         </div>
       </div>
     </section>
